@@ -25,3 +25,18 @@ puts( "math.random() -> ", val , "\n");
 let str = string( 3.14 * 22 + math.random() );
 let str = "The result was : " + str + "\n";
 puts( str );
+
+//
+// Calc sin, cos, and tan 
+//
+
+puts( "maths.sin(46) -> ", math.sin(46), "\n" );
+puts( "maths.cos(14) -> ", math.cos(14), "\n" );
+puts( "maths.tan(23) -> ", math.tan(23), "\n" );
+puts( "maths.log(20) -> ", math.log(20), "\n" );
+puts( "maths.ln(20) -> ", math.ln(20), "\n");
+puts( "maths.exp(0.04) -> ", math.exp(0.04), "\n");
+
+puts( "3**2 -> ", 3**2, "\n");
+
+puts( "maths.sqrt(9) -> ", math.sqrt(9), "\n");

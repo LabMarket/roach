@@ -429,6 +429,9 @@ os.setenv
 os.environment
 directory.glob
 math.abs
+math.sin
+math.cos
+math.tan
 math.random
 math.sqrt
 string.interpolate
@@ -449,6 +452,12 @@ moi.kissa
 		{token.IDENT, "os.environment"},
 		{token.IDENT, "directory.glob"},
 		{token.IDENT, "math.abs"},
+		{token.IDENT, "math.sin"},
+		{token.IDENT, "math.cos"},
+		{token.IDENT, "math.tan"},
+		{token.IDENT, "math.log"},
+		{token.IDENT, "math.ln"},
+		{token.IDENT, "math.exp"},
 		{token.IDENT, "math.random"},
 		{token.IDENT, "math.sqrt"},
 		{token.IDENT, "string.interpolate"},

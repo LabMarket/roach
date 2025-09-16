@@ -335,6 +335,12 @@ func (l *Lexer) readIdentifier() string {
 	valid := map[string]bool{
 		"directory.glob":     true,
 		"math.abs":           true,
+		"math.sin":           true,
+		"math.cos":           true,
+		"math.tan":           true,
+		"math.log":           true,
+		"math.ln":            true,
+		"math.exp":           true,
 		"math.random":        true,
 		"math.sqrt":          true,
 		"os.environment":     true,
