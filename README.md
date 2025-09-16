@@ -40,7 +40,7 @@
 
 # Roach
 
-This repository contains an interpreter for the "Roach" programming language, as described in [Write an Interpreter in Go](https://interpreterbook.com).
+This repository contains an interpreter for the "Roach" programming language, as described in [Write an Interpreter in Go](https://interpreterbook.com) and it's a fork from the archived [monkey in Go language](https://github.com/skx/monkey.git) project.
 
 #### My changes
 
