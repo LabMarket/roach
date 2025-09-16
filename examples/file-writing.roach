@@ -29,3 +29,15 @@ fh.close();
 // Show what we did.
 //
 puts( "We wrote to ", name , "\n");
+
+//
+// Now we'll append data to the file
+//
+let fh   = open(name, "wa");
+fh.write( "One more thing\n" );
+fh.close()
+
+//
+// Show what we did.
+//
+puts( "We appended to ", name , "\n");
