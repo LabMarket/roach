@@ -21,7 +21,7 @@ const (
 	REGEXP_OBJ       = "REGEXP"
 )
 
-// Object is the interface that all of our various object-types must implmenet.
+// Object is the interface that all of our various object-types must implement.
 type Object interface {
 
 	// Type returns the type of this object.
