@@ -1,0 +1,8 @@
+//
+// The roach.go intepreter registers a new
+// custom function called `version()`.
+//
+// Here we test that function.
+//
+
+puts("This is roach version " + version() + "\n")
