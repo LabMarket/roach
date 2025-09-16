@@ -610,12 +610,12 @@ func includeFile(env *object.Environment, args ...object.Object) object.Object {
 	if len(import_file) == 0 {
 		return newError("ArgError: include() expects a file identifier, none given")
 	}
-	imp_filename:=fmt.Sprintf("%s.monkey", import_file)
+	imp_filename:=fmt.Sprintf("%s.roach", import_file)
 	userincludes:=os.Getenv("INCLUDEPATH")
 	if len(userincludes) == 0 {
-		includes="/usr/local/include/monkey:."
+		includes="/usr/local/include/roach:."
 	} else {
-		includes=fmt.Sprintf("%s:%s", userincludes, "/usr/local/include/monkey:." )
+		includes=fmt.Sprintf("%s:%s", userincludes, "/usr/local/include/roach:." )
 	}
 	incpaths:=strings.Split(includes, ":")
 	for _, ipath := range incpaths {
