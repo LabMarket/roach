@@ -16,7 +16,7 @@
 ;; Add the following to your .emacs file
 
 ;; (require 'roach)
-;; (setq auto-mode-alist (append '(("\\.mon$" . roach-mode)) auto-mode-alist)))
+;; (setq auto-mode-alist (append '(("\\.roach$" . roach-mode)) auto-mode-alist)))
 
 
 

@@ -42,7 +42,7 @@
 
 This repository contains an interpreter for the "Roach" programming language, as described in [Write an Interpreter in Go](https://interpreterbook.com) and it's a fork from the archived [monkey in Go language](https://github.com/skx/monkey.git) project.
 
-#### My changes
+#### From the original project
 
 The interpreter in _this_ repository has been significantly extended from the starting point:
 
@@ -50,7 +50,7 @@ The interpreter in _this_ repository has been significantly extended from the st
 * Added postfix operators (`i++`, `i--`).
 * Allow accessing individual characters of a string via the index-operator.
 * Added a driver to read from STDIN, or a named file, rather than a REPL.
-    * This allows executing the examples easily (for example "`./roach examples/hello.mon`".)
+    * This allows executing the examples easily (for example "`./roach examples/hello.roach`".)
 * Added a collection of standard-library functions.
     * Including file input/output, type-discovery, string, and math functions.
 * Added a new way to define functions, via `function`.
@@ -69,7 +69,7 @@ The interpreter in _this_ repository has been significantly extended from the st
 * Function arguments may have defaults.  For example:
   * `function greet( name = "World" ) { puts("Hello, " + name + "\n"); }`
 * Moved parts of the standard-library to 100% pure roach, rather than implementing it in go.
-  * See [data/stdlib.mon](data/stdlib.mon) for the implementation.
+  * See [data/stdlib.roach](data/stdlib.roach) for the implementation.
   * See also the notes on [object-based methods](#31-defininig-new-object-methods).
 * Added the `eval` function.
   * Which allows executing roach-code from a string.
@@ -87,32 +87,25 @@ The interpreter in _this_ repository has been significantly extended from the st
 * Add support for explicit `null` usage:
   * `a = null;  if ( a == null ) { .. }`
 
-#### See Also
+#### My changes
 
-If you enjoyed this repository you might find the related ones interesting:
+* Added `include` primitive to allows for roach files to be imported. So if a file, say `foo.roach` contains:
 
-* A tutorial-lead approach to implementing a FORTH interpreter:
-  * https://github.com/LabMarket/foth
-* A simple TCL-like interpreter:
-  * https://github.com/LabMarket/critical
-* A BASIC interpreter:
-  * https://github.com/LabMarket/gobasic
-* An embedded scripting language, based upon the same Roach core
-  * This follows the second book, but large parts of the code were replaced with different implementations, and things were extended a lot.
-  * https://github.com/LabMarket/evalfilter
+```
+function today() { return "Monday"; }
+```
 
-Finally I put together a couple of "complex" compilers, which convert input into AMD64 assembly language:
+It will be imported with `include("foo")`.
 
-* A mathematical compiler
-  * https://github.com/LabMarket/math-compiler
-* A brainfuck compiler:
-  * https://github.com/LabMarket/bfcc
+with the imported file being within the env var INCLUDEPATH or in the directory `/usr/local/include/roach` or current directory.
+
+The function would be called with `today()`.
 
 
 
 ## 1. Installation
 
-Due to the embedded [standard-library implementation](data/stdlib.mon), which is implemented in roach, you'll need to compile this project with go version 1.16beta1 or higher.
+Due to the embedded [standard-library implementation](data/stdlib.roach), which is implemented in roach, you'll need to compile this project with go version 1.16beta1 or higher.
 
 You can install from source like so:
 
@@ -121,29 +114,22 @@ You can install from source like so:
     go install
 
 
-### Binary Releases
-
-Alternatively you could install a binary-release, from the [release page](https://github.com/LabMarket/roach/releases).
-
-If you're an [emacs](https://www.gnu.org/software/emacs/) user might also wish to install the [roach.el](emacs/roach.el) file, which provides syntax highlighting for roach-scripts.
-
-
 ### 1.1 Usage
 
 To execute a roach-script simply pass the name to the interpreter:
 
-     $ roach ./example/hello.mon
+     $ roach ./example/hello.roach
 
 Scripts can be made executable by adding a suitable shebang line:
 
-     $ cat hello.mon
+     $ cat hello.roach
      #!/usr/bin/env roach
      puts( "Hello, world!\n" );
 
 Execution then works as you would expect:
 
-     $ chmod 755 hello.mon
-     $ ./hello.mon
+     $ chmod 755 hello.roach
+     $ ./hello.roach
      Hello, world!
 
 If no script-name is passed to the interpreter it will read from STDIN and
@@ -270,7 +256,7 @@ You can iterate over the keys in a hash via the `keys` function, or delete
 keys via `delete` (again these functions returns an updated value rather than
 changing it in-place).
 
-Hash functions are demonstrated in the [examples/hash.mon](examples/hash.mon) sample.
+Hash functions are demonstrated in the [examples/hash.roach](examples/hash.roach) sample.
 
 
 
@@ -326,7 +312,7 @@ You can see the implementation of the go-based standard-library beneath [evaluat
 
 **NOTE**: Parts of our standard-library are implemented in 100% pure roach,
 and these are embedded in our compiled interpreter.  The source of the functions
-can be viewed in [data/stdlib.mon](data/stdlib.mon).
+can be viewed in [data/stdlib.roach](data/stdlib.roach).
 
 If you wish to make changes to the roach-based standard-library you'll
 need to rebuild the interpreter after making your changes, to ensure they are bundled into the executable.
@@ -442,7 +428,7 @@ Roach supports the `switch` and `case` expressions, as the following example dem
   }
 ```
 
-See also [examples/switch.mon](examples/switch.mon).
+See also [examples/switch.roach](examples/switch.roach).
 
 
 
@@ -482,7 +468,7 @@ Here you see that we've iterated over the items of the array, we can also see th
           puts( offset, "\t",  item , "\n");
      }
 
-The same style of iteration works for Arrays, Hashes, and the characters which make up a string.  You can see examples of this support in [examples/iteration.mon](examples/iteration.mon).
+The same style of iteration works for Arrays, Hashes, and the characters which make up a string.  You can see examples of this support in [examples/iteration.roach](examples/iteration.roach).
 
 When iterating over hashes you can receive either the keys, or the keys and value at each step in the iteration, otherwise you receive the value and an optional index.
 
@@ -539,7 +525,7 @@ operator (``).
           puts( "An error occurred while running the command: ", uptime["stderr"].trim(), "\n");
       }
 
-The output will be a hash containing the keys `stdout`, `stderr`, and `exitCode`, as demonstrated in [examples/exec.mon](examples/exec.mon).
+The output will be a hash containing the keys `stdout`, `stderr`, and `exitCode`, as demonstrated in [examples/exec.roach](examples/exec.roach).
 
 
 
@@ -550,7 +536,7 @@ The `match` function allows matching a string against a regular-expression.
 If a match fails NULL will be returned, otherwise a hash containing any
 capture groups in the match.
 
-This is demonstrated in the [examples/regexp.mon](examples/regexp.mon) example.
+This is demonstrated in the [examples/regexp.roach](examples/regexp.roach) example.
 
 You can also perform matching (complete with captures), with a literal regular expression object:
 
@@ -590,12 +576,12 @@ Once you have a file-object you can invoke methods upon it:
 
 These are demonstrated in the following examples:
 
-* [examples/file.mon](examples/file.mon)
+* [examples/file.roach](examples/file.roach)
   * Simple example.
-* [examples/file-writing.mon](examples/file-writing.mon)
+* [examples/file-writing.roach](examples/file-writing.roach)
   * Simple example.
-* [examples/wc.mon](examples/wc.mon)
-* [examples/wc2.mon](examples/wc2.mon)
+* [examples/wc.roach](examples/wc.roach)
+* [examples/wc2.roach](examples/wc2.roach)
   * Counting lines.
 
 By default three filehandles will be made available, as constants:
@@ -688,7 +674,7 @@ implicit `self` name.  Invocation would look as you expect:
     let s = "Hello, world";
     s.steve();   -> Hello, I received 'Hello, world' as an argument
 
-You can see [data/stdlib.mon](data/stdlib.mon) implements some primitives
+You can see [data/stdlib.roach](data/stdlib.roach) implements some primitives
 in this fashion, for example the functional-programming methods `array.map`,
 `array.filter`, `string.toupper`, etc, etc.
 

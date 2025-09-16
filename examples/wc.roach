@@ -2,7 +2,7 @@
 
 // A simple script to read a file and count the characters.
 //
-//   $ ./roach wc.mon
+//   $ ./roach wc.roach
 //
 //   Read 2572 characters
 //

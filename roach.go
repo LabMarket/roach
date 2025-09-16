@@ -24,7 +24,7 @@ import (
 // This version-string will be updated via CI system for generated binaries.
 var version = "master/unreleased"
 
-//go:embed data/stdlib.mon
+//go:embed data/stdlib.roach
 var stdlib string
 
 //

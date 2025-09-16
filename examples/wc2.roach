@@ -2,7 +2,7 @@
 
 // A simple script to read a file and count the characters.
 //
-//   $ ./roach wc2.mon
+//   $ ./roach wc2.roach
 //
 //   Read 47 lines
 //
