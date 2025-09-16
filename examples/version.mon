@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 //
 // The roach.go intepreter registers a new
 // custom function called `version()`.

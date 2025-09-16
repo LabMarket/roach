@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 //
 // Sample function showing some simple math operations
 //

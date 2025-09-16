@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 //
 // This example shows how to find files in a directory matching a particular
 // pattern.

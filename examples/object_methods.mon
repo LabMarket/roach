@@ -1,4 +1,5 @@
 #!/usr/bin/env roach
+
 //
 // Object-methods are defined against types in roach.
 //

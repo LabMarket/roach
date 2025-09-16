@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 // A simple test-function for switch-statements.
 function test( name ) {
 

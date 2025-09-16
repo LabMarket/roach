@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 //
 // This file demonstrates string interpolation - putting data
 // from a hash into a string.

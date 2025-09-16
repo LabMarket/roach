@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 // Iterating over the contents of an array
 puts( "Array: value\n")
 a = [ "My", "name", "is", "Steve" ]

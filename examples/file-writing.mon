@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 //
 // Usually you'd open a file for reading via:
 //

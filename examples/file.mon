@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 // This example opens a file for reading, and shows each line.
 //
 // If you were reading a file completely you might prefer to use
