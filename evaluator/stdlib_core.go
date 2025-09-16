@@ -604,6 +604,38 @@ func unlinkFun(args ...object.Object) object.Object {
 	return &object.Boolean{Value: true}
 }
 
+func includeFile(env *object.Environment, args ...object.Object) object.Object {
+	import_file:=args[0].Inspect()
+	includes:=""
+	if len(import_file) == 0 {
+		return newError("ArgError: include() expects a file identifier, none given")
+	}
+	imp_filename:=fmt.Sprintf("%s.monkey", import_file)
+	userincludes:=os.Getenv("INCLUDEPATH")
+	if len(userincludes) == 0 {
+		includes="/usr/local/include/monkey:."
+	} else {
+		includes=fmt.Sprintf("%s:%s", userincludes, "/usr/local/include/monkey:." )
+	}
+	incpaths:=strings.Split(includes, ":")
+	for _, ipath := range incpaths {
+		import_file=fmt.Sprintf("%s/%s", ipath, imp_filename)
+		data, err := os.ReadFile(import_file)
+		if err == nil {
+			l := lexer.New(string(data))
+			p := parser.New(l)
+			program := p.ParseProgram()
+			if len(p.Errors()) == 0 {
+				Eval(program, env)
+				return nil
+			}
+			fmt.Printf("Error parsing eval-string: %s", string(data))
+			os.Exit(1)
+		}
+	}
+	return newError("Unable to open file %s", imp_filename)
+}
+
 func init() {
 	RegisterBuiltin("chmod",
 		func(env *object.Environment, args ...object.Object) object.Object {
@@ -684,5 +716,9 @@ func init() {
 	RegisterBuiltin("unlink",
 		func(env *object.Environment, args ...object.Object) object.Object {
 			return (unlinkFun(args...))
+		})
+	RegisterBuiltin("include",
+		func(env *object.Environment, args ...object.Object) object.Object {
+			return (includeFile(env, args...))
 		})
 }
