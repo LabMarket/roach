@@ -1,7 +1,5 @@
 #!/usr/bin/env roach
 
-include("include");
-
 //
 // This program dumps the command-line arguments the script received.
 //
@@ -15,5 +13,3 @@ for( i < len(a) ) {
    puts( "\t", i, " " , a[i], "\n");
    i++
 }
-
-puts(today("Monday"));

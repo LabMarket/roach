@@ -1,0 +1,12 @@
+#!/usr/bin/env roach
+
+//
+// Execute a simple command
+//
+let s = "puts( \"Hello, world!\\n\" );";
+
+eval(s);
+
+let f = "function today(day) { return day; }";
+
+eval(f);

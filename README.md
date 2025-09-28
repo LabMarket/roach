@@ -42,7 +42,7 @@
 
 This repository contains an interpreter for the "Roach" programming language, as described in [Write an Interpreter in Go](https://interpreterbook.com) and it's a fork from the archived [monkey in Go language](https://github.com/skx/monkey.git) project.
 
-#### From the original project
+## From the original project
 
 The interpreter in _this_ repository has been significantly extended from the starting point:
 
@@ -87,7 +87,9 @@ The interpreter in _this_ repository has been significantly extended from the st
 * Add support for explicit `null` usage:
   * `a = null;  if ( a == null ) { .. }`
 
-#### My changes
+## My changes
+
+### Includes
 
 * Added `include` primitive to allows for roach files to be imported. So if a file, say `foo.roach` contains:
 
@@ -95,12 +97,17 @@ The interpreter in _this_ repository has been significantly extended from the st
 function today() { return "Monday"; }
 ```
 
-It will be imported with `include("foo")`.
-
-with the imported file being within the env var INCLUDEPATH or in the directory `/usr/local/include/roach` or current directory.
+It will be imported with `include("foo")`, with the imported file being within the env var `INCLUDEPATH` or in the directory `/usr/local/include/roach` or current directory.
 
 The function would be called with `today()`.
 
+* The `run` alias to `include` - both allow to run a file. So if a file `bar.roach` contains:
+
+```
+puts("Inside bar.roach\n");
+```
+
+It will be executed with `run("bar")`. The same rules for `include` apply, i.e., the env var `INCLUDEPATH`, lib and current directory.
 
 
 ## 1. Installation

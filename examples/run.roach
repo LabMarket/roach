@@ -1,0 +1,20 @@
+#!/usr/bin/env roach
+
+run("include");
+
+puts(today("Monday"));
+
+
+//
+// Now we'll append code to the file
+//
+let fh   = open("slug.roach", "wa");
+fh.write( "puts(\"One more thing\\n\");" );
+fh.close()
+
+//
+// Run what we created.
+//
+run("slug");
+
+remove("slug.roach");
