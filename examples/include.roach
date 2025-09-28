@@ -1,6 +1,11 @@
+# function useless
 function today(day) { 
     let msg = "Every day is " + day + "\n"
     return msg; 
 }
 
-puts("function today was included!!!\n");
+/*
+    Just say that the useless function was created
+*/
+m = "function today was included!!!\n"
+puts(m);
