@@ -276,32 +276,6 @@ func openFun(args ...object.Object) object.Object {
 	return (file)
 }
 
-// Remove a file
-func removeFun(args ...object.Object) object.Object {
-	if len(args) != 1 {
-		return newError("wrong number of arguments. got=%d, want=1",
-			len(args))
-	}
-
-	path := ""
-
-	// Get the filename
-	switch args[0].(type) {
-	case *object.String:
-		path = args[0].(*object.String).Value
-	default:
-		return newError("argument to `remove` not supported, got=%s",
-			args[0].Type())
-	}
-
-	err := os.Remove(path)
-	if err != nil {
-		return newError("failed to remove file: %s", err.Error())
-	}
-
-	return &object.Boolean{Value: true}
-}
-
 // set a global pragma
 func pragmaFun(args ...object.Object) object.Object {
 
@@ -709,7 +683,7 @@ func init() {
 		})
 	RegisterBuiltin("remove",
 		func(env *object.Environment, args ...object.Object) object.Object {
-			return (removeFun(args...))
+			return (unlinkFun(args...))
 		})
 	RegisterBuiltin("push",
 		func(env *object.Environment, args ...object.Object) object.Object {
