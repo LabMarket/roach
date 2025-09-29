@@ -1,0 +1,46 @@
+{
+    "name": "roach-language",
+    "displayName": "Roach Language Support",
+    "description": "Syntax highlighting for the Roach language",
+    "icon": "./roach.png",
+    "version": "0.0.1",
+    "publisher": "LabMarket",
+    "engines": {
+        "vscode": "^1.78.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "main": "./extension.js",
+    "contributes": {
+        "languages": [
+            {
+                "id": "roach",
+                "aliases": [
+                    "Roach",
+                    "roach"
+                ],
+                "extensions": [
+                    ".roach"
+                ],
+                "configuration": "./language-configuration.json",
+                "icon": {
+                    "light": "./roach-light.svg",
+                    "dark": "./roach-dark.svg"
+                }
+            }
+        ],
+        "grammars": [
+            {
+                "language": "roach",
+                "scopeName": "source.roach",
+                "path": "./roach.tmLanguage.json"
+            }
+        ]
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/LabMarket/roach.git"
+    },
+    "license": "MIT"
+}

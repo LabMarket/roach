@@ -1,0 +1,60 @@
+{
+    "name": "roach",
+    "scopeName": "source.roach",
+    "fileTypes": ["roach"],
+    "patterns": [
+        {
+            "name": "keyword.control.roach",
+            "match": "\\b(if|else|for|return|let|const|switch|case|default|fn|function)\\b",
+            "comment": "Keywords"
+        },
+        {
+            "name": "constant.language.roach",
+            "match": "\\b(true|false|null)\\b",
+            "comment": "Constants"
+        },
+        {
+            "name": "string.quoted.double.roach",
+            "begin": "\"",
+            "end": "\"",
+            "patterns": [
+                {
+                    "name": "constant.character.escape.roach",
+                    "match": "\\\\."
+                }
+            ],
+            "comment": "Double quoted strings"
+        },
+        {
+            "name": "comment.line.number-sign.roach",
+            "match": "#.*$",
+            "comment": "Single-line comments"
+        },
+        {
+            "name": "comment.block.roach",
+            "begin": "/\\*",
+            "end": "\\*/",
+            "comment": "Multi-line comments"
+        },
+        {
+            "name": "variable.other.roach",
+            "match": "[a-zA-Z_][a-zA-Z0-9_]*",
+            "comment": "Variables"
+        },
+          {
+            "name": "constant.numeric.roach",
+            "match": "\\b\\d+(\\.\\d+)?\\b",
+            "comment": "Numbers"
+        },
+        {
+            "name": "keyword.operator.arithmetic.roach",
+            "match": "(\\+|\\-|\\*|\\/|%|\\*\\*)",
+            "comment": "Operators"
+        },
+          {
+            "name": "constant.regexp.roach",
+            "match": "/",
+            "comment": "Regular Expression"
+        }
+    ]
+}
