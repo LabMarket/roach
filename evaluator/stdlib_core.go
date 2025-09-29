@@ -69,13 +69,13 @@ func evalFun(env *object.Environment, args ...object.Object) object.Object {
 			return EvalContext(context.Background(), program, env)
 		}
 
-		// Otherwise abort.  We should have try { } catch
-		// to allow this kind of error to be caught in the future!
-		fmt.Printf("Error parsing eval-string: %s", txt)
+		// Otherwise, return an error object
+		var sb strings.Builder
+		sb.WriteString("Error parsing eval-string:\n")
 		for _, msg := range p.Errors() {
-			fmt.Printf("\t%s\n", msg)
+			sb.WriteString(fmt.Sprintf("\t%s\n", msg))
 		}
-		os.Exit(1)
+		return newError(sb.String())
 	}
 	return newError("argument to `eval` not supported, got=%s",
 		args[0].Type())
@@ -605,21 +605,21 @@ func unlinkFun(args ...object.Object) object.Object {
 }
 
 func includeFile(env *object.Environment, args ...object.Object) object.Object {
-	import_file:=args[0].Inspect()
-	includes:=""
+	import_file := args[0].Inspect()
+	includes := ""
 	if len(import_file) == 0 {
 		return newError("ArgError: include() expects a file identifier, none given")
 	}
-	imp_filename:=fmt.Sprintf("%s.roach", import_file)
-	userincludes:=os.Getenv("INCLUDEPATH")
+	imp_filename := fmt.Sprintf("%s.roach", import_file)
+	userincludes := os.Getenv("INCLUDEPATH")
 	if len(userincludes) == 0 {
-		includes="/usr/local/include/roach:."
+		includes = "/usr/local/include/roach:."
 	} else {
-		includes=fmt.Sprintf("%s:%s", userincludes, "/usr/local/include/roach:." )
+		includes = fmt.Sprintf("%s:%s", userincludes, "/usr/local/include/roach:.")
 	}
-	incpaths:=strings.Split(includes, ":")
+	incpaths := strings.Split(includes, ":")
 	for _, ipath := range incpaths {
-		import_file=fmt.Sprintf("%s/%s", ipath, imp_filename)
+		import_file = fmt.Sprintf("%s/%s", ipath, imp_filename)
 		data, err := os.ReadFile(import_file)
 		if err == nil {
 			l := lexer.New(string(data))
@@ -629,8 +629,12 @@ func includeFile(env *object.Environment, args ...object.Object) object.Object {
 				Eval(program, env)
 				return nil
 			}
-			fmt.Printf("Error parsing eval-string: %s", string(data))
-			os.Exit(1)
+			var sb strings.Builder
+			sb.WriteString(fmt.Sprintf("Error parsing include-file '%s':\n", import_file))
+			for _, msg := range p.Errors() {
+				sb.WriteString(fmt.Sprintf("\t%s\n", msg))
+			}
+			return newError(sb.String())
 		}
 	}
 	return newError("Unable to open file %s", imp_filename)
