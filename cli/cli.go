@@ -130,7 +130,7 @@ func Main() error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("Error reading: %s", err.Error())
+		return fmt.Errorf("error reading: %s", err.Error())
 	}
 
 	return Execute(string(input))
