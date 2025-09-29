@@ -1,7 +1,7 @@
 package cli
 
 import (
-	_ "embed"
+	_ "embed" // enable go:embed data/stdlib.roach
 	"flag"
 	"fmt"
 	"io"
