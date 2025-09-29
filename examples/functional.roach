@@ -76,9 +76,9 @@ puts( "\t", ints.map(square), "\n");
 // Show their cubes, using an anonymous function
 //
 puts( "\nCubes:\n" );
-puts( "\t", ints.map( fn(n) { return n * n * n; }), "\n");
+puts( "\t", ints.map( @(n) { return n * n * n; }), "\n");
 puts( "\nCubes via POW:\n" );
-puts( "\t", ints.map( fn(n) { return n ** 3; }), "\n");
+puts( "\t", ints.map( @(n) { return n ** 3; }), "\n");
 
 //
 // Now use our functional-methods to show odd/even/prime

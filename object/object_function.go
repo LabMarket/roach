@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/LabMarket/roach/ast"
+	"github.com/LabMarket/roach/token"
 )
 
 // Function wraps ast.Identifier array, ast.BlockStatement and Environment and implements Object interface.
@@ -28,7 +29,7 @@ func (f *Function) Inspect() string {
 	for _, p := range f.Parameters {
 		parameters = append(parameters, p.String())
 	}
-	out.WriteString("fn")
+	out.WriteString(token.FUNCTION)
 	out.WriteString("(")
 	out.WriteString(strings.Join(parameters, ", "))
 	out.WriteString(") {\n")

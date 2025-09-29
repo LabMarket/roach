@@ -82,7 +82,7 @@ var keywords = map[string]Type{
 	"default":  DEFAULT,
 	"else":     ELSE,
 	"false":    FALSE,
-	"fn":       FUNCTION,
+	"@":       FUNCTION,
 	"for":      FOR,
 	"foreach":  FOREACH,
 	"function": DEFINE_FUNCTION,

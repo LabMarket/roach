@@ -552,7 +552,7 @@ func TestForLoopExpression(t *testing.T) {
 }
 
 func TestFunctionLiteralParsing(t *testing.T) {
-	input := `fn(x,y=3){x+y;}`
+	input := `@(x,y=3){x+y;}`
 	l := lexer.New(input)
 	p := New(l)
 	program := p.ParseProgram()
@@ -632,9 +632,9 @@ func TestFunctionParameterParsing(t *testing.T) {
 		input            string
 		expectedParameer []string
 	}{
-		{"fn(){}", []string{}},
-		{"fn(x){}", []string{"x"}},
-		{"fn(x,y){}", []string{"x", "y"}},
+		{"@(){}", []string{}},
+		{"@(x){}", []string{"x"}},
+		{"@(x,y){}", []string{"x", "y"}},
 	}
 	for _, tt := range tests {
 		l := lexer.New(tt.input)

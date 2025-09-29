@@ -196,7 +196,7 @@ function array.filter( predicate ) {
 
 // Filter an array and keep only values which are "2".
 assert( "let a = [ 1, 2, 3 , -1, \"steve\", 44 ];
-         let a = a.filter( fn(n) { return n == 2 ; } );
+         let a = a.filter( @(n) { return n == 2 ; } );
          if ( a.string() == \"[2]\" ) {
              return true;
          } else {
@@ -546,7 +546,7 @@ function array.map( fnc ) {
 
 
 assert( "let a = [3,9,-4];
-         a = a.map(fn(n) { return n * n; });
+         a = a.map(@(n) { return n * n; });
          a = a.sort();
          if( a.string() == \"[9, 16, 81]\" ) {
            true;
@@ -554,7 +554,7 @@ assert( "let a = [3,9,-4];
            false;
          }" );
 assert( "let a = [2,-1,-12];
-         a = a.map(fn(n) { return n +2; });
+         a = a.map(@(n) { return n +2; });
          a = a.sort();
          if( a.string() == \"[-10, 1, 4]\" ) {
            true;

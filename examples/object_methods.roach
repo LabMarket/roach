@@ -22,7 +22,7 @@
 //
 // Create an array holding various types
 //
-let t = [ [], 3.13, fn(){} , {} , 3, "steve" ];
+let t = [ [], 3.13, @(){} , {} , 3, "steve" ];
 
 //
 // Walk over the types
