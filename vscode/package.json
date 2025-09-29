@@ -2,8 +2,8 @@
     "name": "roach-language",
     "displayName": "Roach Language Support",
     "description": "Syntax highlighting for the Roach language",
-    "icon": "./roach.png",
-    "version": "0.0.2",
+    "icon": "roach.png",
+    "version": "0.0.1",
     "publisher": "LabMarket",
     "engines": {
         "vscode": "^1.78.0"
@@ -11,7 +11,10 @@
     "categories": [
         "Programming Languages"
     ],
-    "main": "./extension.js",
+    "main": "extension.js",
+    "activationEvents": [
+        "onLanguage:roach"
+    ],
     "contributes": {
         "languages": [
             {
@@ -23,10 +26,10 @@
                 "extensions": [
                     ".roach"
                 ],
-                "configuration": "./language-configuration.json",
+                "configuration": "language-configuration.json",
                 "icon": {
-                    "light": "./roach-light.svg",
-                    "dark": "./roach-dark.svg"
+                    "light": "roach-light.svg",
+                    "dark": "roach-dark.svg"
                 }
             }
         ],
@@ -34,7 +37,7 @@
             {
                 "language": "roach",
                 "scopeName": "source.roach",
-                "path": "./roach.tmLanguage.json"
+                "path": "roach.tmLanguage.json"
             }
         ]
     },
