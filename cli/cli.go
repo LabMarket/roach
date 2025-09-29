@@ -4,7 +4,7 @@ import (
 	_ "embed"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 
@@ -24,16 +24,12 @@ var version = "master/unreleased"
 //go:embed data/stdlib.roach
 var stdlib string
 
-//
 // Implemention of "version()" function.
-//
 func versionFun(args ...object.Object) object.Object {
 	return &object.String{Value: version}
 }
 
-//
 // Implemention of "args()" function.
-//
 func argsFun(args ...object.Object) object.Object {
 	l := len(os.Args[1:])
 	result := make([]object.Object, l)
@@ -43,9 +39,7 @@ func argsFun(args ...object.Object) object.Object {
 	return &object.Array{Elements: result}
 }
 
-//
 // Execute the supplied string as a program.
-//
 func Execute(input string) error {
 
 	env := object.NewEnvironment()
@@ -130,9 +124,9 @@ func Main() error {
 	var err error
 
 	if len(flag.Args()) > 0 {
-		input, err = ioutil.ReadFile(os.Args[1])
+		input, err = os.ReadFile(os.Args[1])
 	} else {
-		input, err = ioutil.ReadAll(os.Stdin)
+		input, err = io.ReadAll(os.Stdin)
 	}
 
 	if err != nil {

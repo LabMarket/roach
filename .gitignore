@@ -1,2 +1,4 @@
 roach
 .DS_Store
+*.patch
+*.vsix
