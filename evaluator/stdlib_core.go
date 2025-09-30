@@ -83,7 +83,6 @@ func evalFun(env *object.Environment, args ...object.Object) object.Object {
 
 // exit a program.
 func exitFun(args ...object.Object) object.Object {
-
 	code := 0
 
 	// Optionally an exit-code might be supplied as an argument
@@ -119,7 +118,6 @@ func intFun(args ...object.Object) object.Object {
 		input := args[0].(*object.Boolean).Value
 		if input {
 			return &object.Integer{Value: 1}
-
 		}
 		return &object.Integer{Value: 0}
 	case *object.Integer:
@@ -233,12 +231,10 @@ func mkdirFun(args ...object.Object) object.Object {
 		return &object.Boolean{Value: false}
 	}
 	return &object.Boolean{Value: true}
-
 }
 
 // Open a file
 func openFun(args ...object.Object) object.Object {
-
 	path := ""
 	mode := "r"
 
@@ -278,7 +274,6 @@ func openFun(args ...object.Object) object.Object {
 
 // set a global pragma
 func pragmaFun(args ...object.Object) object.Object {
-
 	// If more than one argument that's an error
 	if len(args) > 1 {
 		return newError("wrong number of arguments. got=%d, want=0|1",
@@ -347,7 +342,6 @@ func putsFun(args ...object.Object) object.Object {
 
 // printfFun is the implementation of our `printf` function.
 func printfFun(args ...object.Object) object.Object {
-
 	// Convert to the formatted version, via our `sprintf`
 	// function.
 	out := sprintfFun(args...)
@@ -355,7 +349,6 @@ func printfFun(args ...object.Object) object.Object {
 	// If that returned a string then we can print it
 	if out.Type() == object.STRING_OBJ {
 		fmt.Print(out.(*object.String).Value)
-
 	}
 
 	return NULL
@@ -363,7 +356,6 @@ func printfFun(args ...object.Object) object.Object {
 
 // sprintfFun is the implementation of our `sprintf` function.
 func sprintfFun(args ...object.Object) object.Object {
-
 	// We expect 1+ arguments
 	if len(args) < 1 {
 		return &object.Null{}
@@ -396,7 +388,6 @@ func sprintfFun(args ...object.Object) object.Object {
 
 // Get file info.
 func statFun(args ...object.Object) object.Object {
-
 	if len(args) != 1 {
 		return newError("wrong number of arguments. got=%d, want=1",
 			len(args))
@@ -454,7 +445,6 @@ func statFun(args ...object.Object) object.Object {
 	res[typeKey.HashKey()] = typeHash
 
 	return &object.Hash{Pairs: res}
-
 }
 
 // Get hash keys
@@ -605,22 +595,22 @@ func unlinkFun(args ...object.Object) object.Object {
 }
 
 func includeFile(env *object.Environment, args ...object.Object) object.Object {
-	import_file := args[0].Inspect()
+	importFile := args[0].Inspect()
 	includes := ""
-	if len(import_file) == 0 {
+	if len(importFile) == 0 {
 		return newError("ArgError: include() expects a file identifier, none given")
 	}
-	imp_filename := fmt.Sprintf("%s.roach", import_file)
-	userincludes := os.Getenv("INCLUDEPATH")
-	if len(userincludes) == 0 {
+	importFileName := fmt.Sprintf("%s.roach", importFile)
+	userIncludes := os.Getenv("INCLUDEPATH")
+	if len(userIncludes) == 0 {
 		includes = "/usr/local/include/roach:."
 	} else {
-		includes = fmt.Sprintf("%s:%s", userincludes, "/usr/local/include/roach:.")
+		includes = fmt.Sprintf("%s:%s", userIncludes, "/usr/local/include/roach:.")
 	}
-	incpaths := strings.Split(includes, ":")
-	for _, ipath := range incpaths {
-		import_file = fmt.Sprintf("%s/%s", ipath, imp_filename)
-		data, err := os.ReadFile(import_file)
+	incluePaths := strings.Split(includes, ":")
+	for _, ipath := range incluePaths {
+		importFile = fmt.Sprintf("%s/%s", ipath, importFileName)
+		data, err := os.ReadFile(importFile)
 		if err == nil {
 			l := lexer.New(string(data))
 			p := parser.New(l)
@@ -630,14 +620,14 @@ func includeFile(env *object.Environment, args ...object.Object) object.Object {
 				return nil
 			}
 			var sb strings.Builder
-			sb.WriteString(fmt.Sprintf("Error parsing include-file '%s':\n", import_file))
+			sb.WriteString(fmt.Sprintf("Error parsing include-file '%s':\n", importFile))
 			for _, msg := range p.Errors() {
 				sb.WriteString(fmt.Sprintf("\t%s\n", msg))
 			}
 			return newError(sb.String())
 		}
 	}
-	return newError("Unable to open file %s", imp_filename)
+	return newError("Unable to open file %s", importFileName)
 }
 
 func init() {
