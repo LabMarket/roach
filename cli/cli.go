@@ -1,7 +1,7 @@
 package cli
 
 import (
-	_ "embed"
+	_ "embed" // enable go:embed data/stdlib.roach
 	"flag"
 	"fmt"
 	"io"
@@ -88,6 +88,7 @@ func Execute(input string) error {
 	return nil
 }
 
+// Main is the entry point for the CLI application.
 func Main() error {
 
 	//
