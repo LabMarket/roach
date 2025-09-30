@@ -49,7 +49,7 @@ import (
 func init() {
 	// The first argument is the name of the function as it will be called in Roach.
 	// The second is the Go function that implements it.
-	evaluator.RegisterBuiltin("time.now", timeNow)
+	evaluator.RegisterBuiltin("timenow", timeNow)
 }
 
 // --- Define your wrapper functions here ---
@@ -109,11 +109,9 @@ Create a script to test it, e.g., `test.roach`:
 ```roach
 #!/usr/bin/env roach
 
-puts("Hello from a custom build!
-");
-let now = time.now();
-puts("The current time is: ", now, "
-");
+puts("Hello from a custom build!\n");
+let now = timenow();
+puts("The current time is: ", now, "\n");
 ```
 
 Run it with your custom binary:
