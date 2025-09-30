@@ -88,6 +88,7 @@ func Execute(input string) error {
 	return nil
 }
 
+// Main is the entry point for the CLI application.
 func Main() error {
 
 	//
