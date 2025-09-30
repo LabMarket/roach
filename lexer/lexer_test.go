@@ -415,7 +415,6 @@ let c = 3.113;
 	l := New(input)
 	tok := l.NextToken()
 	for tok.Type != token.EOF {
-
 		tok = l.NextToken()
 	}
 }
@@ -432,6 +431,9 @@ math.abs
 math.sin
 math.cos
 math.tan
+math.log
+math.ln
+math.exp
 math.random
 math.sqrt
 string.interpolate
@@ -721,7 +723,6 @@ func TestDotDot(t *testing.T) {
 
 // TestIllegalString is designed to look for an unterminated/illegal string
 func TestIllegalString(t *testing.T) {
-
 	// Illegal strings
 	bad := []string{
 		`if ( f ~= "steve\

@@ -7,7 +7,6 @@ import (
 
 // Test looking up values succeeds, then fails
 func TestLookup(t *testing.T) {
-
 	for key, val := range keywords {
 
 		// Obviously this will pass.
@@ -16,8 +15,9 @@ func TestLookup(t *testing.T) {
 		}
 
 		// Once the keywords are uppercase they'll no longer
-		// match - so we find them as identifiers.
-		if LookupIdentifier(strings.ToUpper(string(key))) != IDENT {
+		// match - so we find them as identifiers, unless the keyword is
+		// a symbol
+		if strings.ToUpper(string(key)) != key && LookupIdentifier(strings.ToUpper(string(key))) != IDENT {
 			t.Errorf("Lookup of %s failed", key)
 		}
 	}
