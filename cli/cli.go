@@ -41,6 +41,10 @@ func argsFun(args ...object.Object) object.Object {
 
 // Execute the supplied string as a program.
 func Execute(input string) error {
+	cliModule := &object.Module{
+		Name:    "cli",
+		Members: make(map[string]object.Object),
+	}
 
 	env := object.NewEnvironment()
 	l := lexer.New(input)
@@ -57,16 +61,14 @@ func Execute(input string) error {
 
 	// Register a function called version()
 	// that the script can call.
-	evaluator.RegisterBuiltin("version",
-		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
-			return (versionFun(args...))
-		}})
-
+	cliModule.Members["version"] = &object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		return (versionFun(args...))
+	}}
 	// Access to the command-line arguments
-	evaluator.RegisterBuiltin("args",
-		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
-			return (argsFun(args...))
-		}})
+	cliModule.Members["args"] = &object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		return (argsFun(args...))
+	}}
+	evaluator.RegisterBuiltin("cli", cliModule)
 
 	//
 	//  Parse and evaluate our standard-library.
@@ -90,7 +92,6 @@ func Execute(input string) error {
 
 // Main is the entry point for the CLI application.
 func Main() error {
-
 	//
 	// Setup some flags.
 	//
