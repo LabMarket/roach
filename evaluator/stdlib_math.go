@@ -3,7 +3,6 @@ package evaluator
 import (
 	"math"
 	"math/rand"
-	"time"
 
 	"github.com/LabMarket/roach/object"
 )
@@ -30,7 +29,6 @@ func mathAbs(args ...object.Object) object.Object {
 		return newError("argument to `math.abs` not supported, got=%s",
 			args[0].Type())
 	}
-
 }
 
 // val = math.random()
@@ -55,7 +53,6 @@ func mathSqrt(args ...object.Object) object.Object {
 		return newError("argument to `math.sqrt` not supported, got=%s",
 			args[0].Type())
 	}
-
 }
 
 // val = math.sin(int);
@@ -73,7 +70,7 @@ func mathSin(args ...object.Object) object.Object {
 		return &object.Float{Value: math.Sin(v)}
 	default:
 		return newError("argument to `math.sin` not supported, got=%s",
-			args[0].Type())	
+			args[0].Type())
 	}
 }
 
@@ -92,7 +89,7 @@ func mathCos(args ...object.Object) object.Object {
 		return &object.Float{Value: math.Cos(v)}
 	default:
 		return newError("argument to `math.cos` not supported, got=%s",
-			args[0].Type())	
+			args[0].Type())
 	}
 }
 
@@ -111,7 +108,7 @@ func mathTan(args ...object.Object) object.Object {
 		return &object.Float{Value: math.Tan(v)}
 	default:
 		return newError("argument to `math.tan` not supported, got=%s",
-			args[0].Type())	
+			args[0].Type())
 	}
 }
 
@@ -185,12 +182,9 @@ func mathExp(args ...object.Object) object.Object {
 }
 
 func init() {
-	// Setup our random seed.
-	rand.Seed(time.Now().UnixNano())
-
 	// Create the module
 	mathModule := &object.Module{
-		Name: "math",
+		Name:    "math",
 		Members: make(map[string]object.Object),
 	}
 
