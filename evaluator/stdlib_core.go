@@ -632,95 +632,95 @@ func includeFile(env *object.Environment, args ...object.Object) object.Object {
 
 func init() {
 	RegisterBuiltin("chmod",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (chmodFun(args...))
-		})
+		}})
 	RegisterBuiltin("delete",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (hashDelete(args...))
-		})
+		}})
 	RegisterBuiltin("eval",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (evalFun(env, args...))
-		})
+		}})
 	RegisterBuiltin("exit",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (exitFun(args...))
-		})
+		}})
 	RegisterBuiltin("int",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (intFun(args...))
-		})
+		}})
 	RegisterBuiltin("keys",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (hashKeys(args...))
-		})
+		}})
 	RegisterBuiltin("len",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (lenFun(args...))
-		})
+		}})
 	RegisterBuiltin("match",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (matchFun(args...))
-		})
+		}})
 	RegisterBuiltin("mkdir",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (mkdirFun(args...))
-		})
+		}})
 	RegisterBuiltin("pragma",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (pragmaFun(args...))
-		})
+		}})
 	RegisterBuiltin("open",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (openFun(args...))
-		})
+		}})
 	RegisterBuiltin("remove",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (unlinkFun(args...))
-		})
+		}})
 	RegisterBuiltin("push",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (pushFun(args...))
-		})
+		}})
 	RegisterBuiltin("puts",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (putsFun(args...))
-		})
+		}})
 	RegisterBuiltin("printf",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (printfFun(args...))
-		})
+		}})
 	RegisterBuiltin("set",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (setFun(args...))
-		})
+		}})
 	RegisterBuiltin("sprintf",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (sprintfFun(args...))
-		})
+		}})
 	RegisterBuiltin("stat",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (statFun(args...))
-		})
+		}})
 	RegisterBuiltin("string",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (strFun(args...))
-		})
+		}})
 	RegisterBuiltin("type",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (typeFun(args...))
-		})
+		}})
 	RegisterBuiltin("unlink",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (unlinkFun(args...))
-		})
+		}})
 	RegisterBuiltin("include",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (includeFile(env, args...))
-		})
+		}})
 	RegisterBuiltin("run",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (includeFile(env, args...))
-		})
+		}})
 }

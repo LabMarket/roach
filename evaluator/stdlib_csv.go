@@ -86,12 +86,20 @@ func csvWrite(args ...object.Object) object.Object {
 }
 
 func init() {
-	RegisterBuiltin("csv.read",
-		func(env *object.Environment, args ...object.Object) object.Object {
-			return (csvRead(args...))
-		})
-	RegisterBuiltin("csv.write",
-		func(env *object.Environment, args ...object.Object) object.Object {
-			return (csvWrite(args...))
-		})
+	// Create the module
+	csvModule := &object.Module{
+		Name: "csv",
+		Members: make(map[string]object.Object),
+	}
+
+	// Register the functions
+	csvModule.Members["read"] = &object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		return (csvRead(args...))
+	}}
+	csvModule.Members["write"] = &object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		return (csvWrite(args...))
+	}}
+
+	// Register the module itself.
+	RegisterBuiltin("csv", csvModule)
 }

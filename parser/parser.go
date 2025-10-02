@@ -164,7 +164,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.NOT_CONTAINS, p.parseInfixExpression)
 	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
 	p.registerInfix(token.OR, p.parseInfixExpression)
-	p.registerInfix(token.PERIOD, p.parseMethodCallExpression)
+	p.registerInfix(token.PERIOD, p.parseMemberAccessExpression)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
 	p.registerInfix(token.PLUS_EQUALS, p.parseAssignExpression)
 	p.registerInfix(token.POW, p.parseInfixExpression)
@@ -999,14 +999,21 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 	return hash
 }
 
-// parseMethodCallExpression parses an object-based method-call.
-func (p *Parser) parseMethodCallExpression(obj ast.Expression) ast.Expression {
-	methodCall := &ast.ObjectCallExpression{Token: p.curToken, Object: obj}
-	p.nextToken()
-	name := p.parseIdentifier()
-	p.nextToken()
-	methodCall.Call = p.parseCallExpression(name)
-	return methodCall
+// parseMemberAccessExpression parses a member access on an object.
+func (p *Parser) parseMemberAccessExpression(left ast.Expression) ast.Expression {
+	exp := &ast.MemberAccessExpression{
+		Token: p.curToken, // The '.' token
+		Left:  left,
+	}
+
+	// We expect an identifier after the dot.
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+
+	exp.Right = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	return exp
 }
 
 // curTokenIs tests if the current token has the given type.

@@ -308,132 +308,12 @@ func newToken(tokenType token.Type, ch rune) token.Token {
 
 // readIdentifier is designed to read an identifier (name of variable,
 // function, etc).
-//
-// However there is a complication due to our historical implementation
-// of the standard library.  We really want to stop identifiers if we hit
-// a period, to allow method-calls to work on objects.
-//
-// So with input like this:
-//
-//	a.blah();
-//
-// Our identifier should be "a" (then we have a period, then a second
-// identifier "blah", followed by opening & closing parenthesis).
-//
-// However we also have to cover the case of:
-//
-//	string.toupper( "blah" );
-//	os.getenv( "PATH" );
-//	..
-//
-// So we have a horrid implementation..
 func (l *Lexer) readIdentifier() string {
-
-	//
-	// Functions which are permitted to have dots in their name.
-	//
-	valid := map[string]bool{
-		"csv.read":           true,
-		"csv.write":          true,
-		"directory.glob":     true,
-		"math.abs":           true,
-		"math.sin":           true,
-		"math.cos":           true,
-		"math.tan":           true,
-		"math.log":           true,
-		"math.ln":            true,
-		"math.exp":           true,
-		"math.random":        true,
-		"math.sqrt":          true,
-		"os.environment":     true,
-		"os.getenv":          true,
-		"os.setenv":          true,
-		"string.interpolate": true,
-	}
-
-	//
-	// Types which will have valid methods.
-	//
-	types := []string{"string.",
-		"array.",
-		"integer.",
-		"float.",
-		"hash.",
-		"object."}
-
-	id := ""
-
-	//
-	// Save our position, in case we need to jump backwards in
-	// our scanning.  Yeah.
-	//
 	position := l.position
-	rposition := l.readPosition
-
-	//
-	// Build up our identifier, handling only valid characters.
-	//
-	// NOTE: This WILL consider the period valid, allowing the
-	// parsing of "foo.bar", "os.getenv", "blah.blah.blah", etc.
-	//
 	for isIdentifier(l.ch) {
-		id += string(l.ch)
 		l.readChar()
 	}
-
-	//
-	// Now we to see if our identifier had a period inside it.
-	//
-	if strings.Contains(id, ".") {
-
-		// Is it a known-good function?
-		ok := valid[id]
-
-		// If not see if it has a type-prefix, which will
-		// let the definition succeed.
-		if !ok {
-			for _, i := range types {
-				if strings.HasPrefix(id, i) {
-					ok = true
-				}
-			}
-		}
-
-		//
-		// Not permitted?  Then we abort.
-		//
-		// We reset our lexer-state to the position just ahead
-		// of the period.  This will then lead to a syntax
-		// error.
-		//
-		// Which probably means our lexer should abort instead.
-		//
-		// For the moment we'll leave as-is.
-		//
-		if !ok {
-
-			//
-			// OK first of all we truncate our identifier
-			// at the position before the "."
-			//
-			offset := strings.Index(id, ".")
-			id = id[:offset]
-
-			//
-			// Now we have to move backwards - as a quickie
-			// We'll reset our position and move forwards
-			// the length of the bits we went too-far.
-			l.position = position
-			l.readPosition = rposition
-			for offset > 0 {
-				l.readChar()
-				offset--
-			}
-		}
-	}
-
-	// And now our pain is over.
-	return id
+	return string(l.characters[position:l.position])
 }
 
 // skip white space
@@ -615,7 +495,7 @@ func (l *Lexer) readRegexp() (string, error) {
 				}
 
 				// read the next
-				l.readChar()
+			l.readChar()
 			}
 
 			// convert the regexp to go-lang
@@ -641,7 +521,7 @@ func (l *Lexer) peekChar() rune {
 // determinate ch is identifier or not
 func isIdentifier(ch rune) bool {
 
-	if unicode.IsLetter(ch) || unicode.IsDigit(ch) || ch == '.' || ch == '?' || ch == '$' || ch == '@' || ch == '_' {
+	if unicode.IsLetter(ch) || unicode.IsDigit(ch) || ch == '?' || ch == '$' || ch == '@' || ch == '_' {
 		return true
 	}
 

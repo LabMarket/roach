@@ -604,34 +604,35 @@ func (ce *CallExpression) String() string {
 	return out.String()
 }
 
-// ObjectCallExpression is used when calling a method on an object.
-type ObjectCallExpression struct {
-	// Token is the literal token
+// MemberAccessExpression holds an expression for accessing a member of an object.
+type MemberAccessExpression struct {
+	// Token holds the '.' token.
 	Token token.Token
 
-	// Object is the object against which the call is invoked.
-	Object Expression
+	// Left is the object being accessed.
+	Left Expression
 
-	// Call is the method-name.
-	Call Expression
+	// Right is the member being accessed.
+	Right *Identifier
 }
 
-func (oce *ObjectCallExpression) expressionNode() {}
+func (mae *MemberAccessExpression) expressionNode() {}
 
 // TokenLiteral returns the literal token.
-func (oce *ObjectCallExpression) TokenLiteral() string {
-	return oce.Token.Literal
-}
+func (mae *MemberAccessExpression) TokenLiteral() string { return mae.Token.Literal }
 
 // String returns this object as a string.
-func (oce *ObjectCallExpression) String() string {
+func (mae *MemberAccessExpression) String() string {
 	var out bytes.Buffer
-	out.WriteString(oce.Object.String())
+	out.WriteString("(")
+	out.WriteString(mae.Left.String())
 	out.WriteString(".")
-	out.WriteString(oce.Call.String())
-
+	out.WriteString(mae.Right.String())
+	out.WriteString(")")
 	return out.String()
 }
+
+
 
 // StringLiteral holds a string
 type StringLiteral struct {

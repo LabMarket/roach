@@ -185,45 +185,44 @@ func mathExp(args ...object.Object) object.Object {
 }
 
 func init() {
-	//
 	// Setup our random seed.
-	//
 	rand.Seed(time.Now().UnixNano())
-	RegisterBuiltin("math.abs",
-		func(env *object.Environment, args ...object.Object) object.Object {
-			return (mathAbs(args...))
-		})
-	RegisterBuiltin("math.sin",
-		func(env *object.Environment, args ...object.Object) object.Object {
-			return (mathSin(args...))
-		})
-	RegisterBuiltin("math.cos",
-		func(env *object.Environment, args ...object.Object) object.Object {
-			return (mathCos(args...))
-		})
-	RegisterBuiltin("math.tan",
-		func(env *object.Environment, args ...object.Object) object.Object {
-			return (mathTan(args...))
-		})
-	RegisterBuiltin("math.random",
-		func(env *object.Environment, args ...object.Object) object.Object {
-			return (mathRandom(args...))
-		})
-	RegisterBuiltin("math.sqrt",
-		func(env *object.Environment, args ...object.Object) object.Object {
-			return (mathSqrt(args...))
-		})
-	RegisterBuiltin("math.log",
-		func(env *object.Environment, args ...object.Object) object.Object {
-			return (mathLog(args...))
-		})
-	RegisterBuiltin("math.ln",
-		func(env *object.Environment, args ...object.Object) object.Object {
-			return (mathLn(args...))
-		})
-	RegisterBuiltin("math.exp",
-		func(env *object.Environment, args ...object.Object) object.Object {
-			return (mathExp(args...))
-		})
-	
+
+	// Create the module
+	mathModule := &object.Module{
+		Name: "math",
+		Members: make(map[string]object.Object),
+	}
+
+	// Register the functions
+	mathModule.Members["abs"] = &object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		return (mathAbs(args...))
+	}}
+	mathModule.Members["sin"] = &object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		return (mathSin(args...))
+	}}
+	mathModule.Members["cos"] = &object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		return (mathCos(args...))
+	}}
+	mathModule.Members["tan"] = &object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		return (mathTan(args...))
+	}}
+	mathModule.Members["random"] = &object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		return (mathRandom(args...))
+	}}
+	mathModule.Members["sqrt"] = &object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		return (mathSqrt(args...))
+	}}
+	mathModule.Members["log"] = &object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		return (mathLog(args...))
+	}}
+	mathModule.Members["ln"] = &object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		return (mathLn(args...))
+	}}
+	mathModule.Members["exp"] = &object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		return (mathExp(args...))
+	}}
+
+	// Register the module itself.
+	RegisterBuiltin("math", mathModule)
 }

@@ -28,7 +28,7 @@ var (
 )
 
 // The built-in functions / standard-library methods are stored here.
-var builtins = map[string]*object.Builtin{}
+var builtins = map[string]object.Object{}
 
 // Eval is our core function for evaluating nodes.
 func Eval(node ast.Node, env *object.Environment) object.Object {
@@ -134,15 +134,6 @@ func EvalContext(ctx context.Context, node ast.Node, env *object.Environment) ob
 		defaults := node.Defaults
 		env.Set(node.TokenLiteral(), &object.Function{Parameters: params, Env: env, Body: body, Defaults: defaults})
 		return NULL
-	case *ast.ObjectCallExpression:
-		res := evalObjectCallExpression(ctx, node, env)
-		if isError(res) {
-			fmt.Fprintf(os.Stderr, "Error calling object-method %s\n", res.Inspect())
-			if PRAGMAS["strict"] == 1 {
-				os.Exit(1)
-			}
-		}
-		return res
 	case *ast.CallExpression:
 		function := EvalContext(ctx, node.Function, env)
 		if isError(function) {
@@ -989,6 +980,26 @@ func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object
 	return newError("%s", "identifier not found: "+node.Value)
 }
 
+func evalMemberAccessExpression(ctx context.Context, node *ast.MemberAccessExpression, env *object.Environment) object.Object {
+	left := EvalContext(ctx, node.Left, env)
+	if isError(left) {
+		return left
+	}
+
+	switch obj := left.(type) {
+	case *object.Module:
+		member, ok := obj.Members[node.Right.Value]
+		if !ok {
+			return newError("no such member '%s' on module '%s'", node.Right.Value, obj.Name)
+		}
+		return member
+	default:
+		// Here we can handle method calls on other types like strings, arrays, etc.
+		// For now, we'll just return an error.
+		return newError("member access not supported on %s", left.Type())
+	}
+}
+
 func evalExpression(ctx context.Context, exps []ast.Expression, env *object.Environment) []object.Object {
 	var result []object.Object
 	for _, e := range exps {
@@ -1257,117 +1268,11 @@ func upwrapReturnValue(obj object.Object) object.Object {
 
 // RegisterBuiltin registers a built-in function.  This is used to register
 // our "standard library" functions.
-func RegisterBuiltin(name string, fun object.BuiltinFunction) {
-	builtins[name] = &object.Builtin{Fn: fun}
+func RegisterBuiltin(name string, fun object.Object) {
+	builtins[name] = fun
 }
 
-// evalObjectCallExpression invokes methods against objects.
-func evalObjectCallExpression(ctx context.Context, call *ast.ObjectCallExpression, env *object.Environment) object.Object {
-	obj := EvalContext(ctx, call.Object, env)
 
-	if obj == nil {
-		return newError("impossible object-call on an empty object")
-	}
-
-	if method, ok := call.Call.(*ast.CallExpression); ok {
-
-		//
-		// Here we try to invoke the object.method() call which has
-		// been implemented in go.
-		//
-		// We do this by forwarding the call to the appropriate
-		// `invokeMethod` interface on the object.
-		//
-		args := evalExpression(ctx, call.Call.(*ast.CallExpression).Arguments, env)
-		ret := obj.InvokeMethod(method.Function.String(), *env, args...)
-		if ret != nil {
-			return ret
-		}
-
-		//
-		// If we reach this point then the invokation didn't
-		// succeed, that probably means that the function wasn't
-		// implemented in go.
-		//
-		// So now we want to look for it in roach, and we have
-		// enough details to find the appropriate function.
-		//
-		//  * We have the object involved.
-		//
-		//  * We have the type of that object.
-		//
-		//  * We have the name of the function.
-		//
-		//  * We have the arguments.
-		//
-		// We'll use the type + name to lookup the (global) function
-		// to invoke.  For example in this case we'll invoke
-		// `string.len()` - because the type of the object we're
-		// invoking-against is string:
-		//
-		//  "steve".len();
-		//
-		// For this case we'll be looking for `array.foo()`.
-		//
-		//   let a = [ 1, 2, 3 ];
-		//   puts( a.foo() );
-		//
-		// As a final fall-back we'll look for "object.foo()"
-		// if "array.foo()" isn't defined.
-		//
-		//
-		//
-		attempts := []string{}
-		attempts = append(attempts, strings.ToLower(string(obj.Type())))
-		attempts = append(attempts, "object")
-
-		//
-		// Look for "$type.name", or "object.name"
-		//
-		for _, prefix := range attempts {
-
-			//
-			// What we're attempting to execute.
-			//
-			name := prefix + "." + method.Function.String()
-
-			//
-			// Try to find that function in our environment.
-			//
-			if fn, ok := env.Get(name); ok {
-
-				//
-				// Extend our environment with the functional-args.
-				//
-				extendEnv := extendFunctionEnv(ctx, fn.(*object.Function), args)
-
-				//
-				// Now set "self" to be the implicit object, against
-				// which the function-call will be operating.
-				//
-				extendEnv.Set("self", obj)
-
-				//
-				// Finally invoke & return.
-				//
-				evaluated := EvalContext(ctx, fn.(*object.Function).Body, extendEnv)
-				obj = upwrapReturnValue(evaluated)
-				return obj
-			}
-		}
-
-	}
-
-	//
-	// If we hit this point we have had a method invoked which
-	// was neither defined in go nor roach.
-	//
-	// e.g. "steve".md5sum()
-	//
-	// So we've got no choice but to return an error.
-	//
-	return newError("Failed to invoke method: %s", call.Call.(*ast.CallExpression).Function.String())
-}
 
 func objectToNativeBoolean(o object.Object) bool {
 	if r, ok := o.(*object.ReturnValue); ok {

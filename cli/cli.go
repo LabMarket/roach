@@ -58,15 +58,15 @@ func Execute(input string) error {
 	// Register a function called version()
 	// that the script can call.
 	evaluator.RegisterBuiltin("version",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (versionFun(args...))
-		})
+		}})
 
 	// Access to the command-line arguments
 	evaluator.RegisterBuiltin("args",
-		func(env *object.Environment, args ...object.Object) object.Object {
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
 			return (argsFun(args...))
-		})
+		}})
 
 	//
 	//  Parse and evaluate our standard-library.

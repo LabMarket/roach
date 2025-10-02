@@ -29,8 +29,17 @@ func dirGlob(args ...object.Object) object.Object {
 }
 
 func init() {
-	RegisterBuiltin("directory.glob",
-		func(env *object.Environment, args ...object.Object) object.Object {
-			return (dirGlob(args...))
-		})
+	// Create the module
+	dirModule := &object.Module{
+		Name: "directory",
+		Members: make(map[string]object.Object),
+	}
+
+	// Register the functions
+	dirModule.Members["glob"] = &object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		return (dirGlob(args...))
+	}}
+
+	// Register the module itself.
+	RegisterBuiltin("directory", dirModule)
 }

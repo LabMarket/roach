@@ -66,16 +66,23 @@ func setEnvFun(args ...object.Object) object.Object {
 }
 
 func init() {
-	RegisterBuiltin("os.getenv",
-		func(env *object.Environment, args ...object.Object) object.Object {
-			return (getEnvFun(args...))
-		})
-	RegisterBuiltin("os.setenv",
-		func(env *object.Environment, args ...object.Object) object.Object {
-			return (setEnvFun(args...))
-		})
-	RegisterBuiltin("os.environment",
-		func(env *object.Environment, args ...object.Object) object.Object {
-			return (envFun(args...))
-		})
+	// Create the module
+	osModule := &object.Module{
+		Name: "os",
+		Members: make(map[string]object.Object),
+	}
+
+	// Register the functions
+	osModule.Members["getenv"] = &object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		return (getEnvFun(args...))
+	}}
+	osModule.Members["setenv"] = &object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		return (setEnvFun(args...))
+	}}
+	osModule.Members["environment"] = &object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
+		return (envFun(args...))
+	}}
+
+	// Register the module itself.
+	RegisterBuiltin("os", osModule)
 }

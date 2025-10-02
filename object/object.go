@@ -1,6 +1,8 @@
 // Package object contains our core-definitions for objects.
 package object
 
+import "fmt"
+
 // Type describes the type of an object.
 type Type string
 
@@ -19,6 +21,7 @@ const (
 	HASH_OBJ         = "HASH"
 	FILE_OBJ         = "FILE"
 	REGEXP_OBJ       = "REGEXP"
+	MODULE_OBJ       = "MODULE"
 )
 
 // Object is the interface that all of our various object-types must implement.
@@ -69,4 +72,28 @@ type Iterable interface {
 	// means the iteration has completed and no further
 	// items are available.
 	Next() (Object, Object, bool)
+}
+
+// Module represents a collection of functions.
+type Module struct {
+	Name    string
+	Members map[string]Object
+}
+
+// Type returns the type of this object.
+func (m *Module) Type() Type { return MODULE_OBJ }
+
+// Inspect returns a string-representation of the given object.
+func (m *Module) Inspect() string {
+	return fmt.Sprintf("<module:%s>", m.Name)
+}
+
+// ToInterface converts the given object to a "native" golang value.
+func (m *Module) ToInterface() interface{} {
+	return "<module>"
+}
+
+// InvokeMethod invokes a method against the object.
+func (m *Module) InvokeMethod(method string, env Environment, args ...Object) Object {
+	return nil
 }
