@@ -436,12 +436,7 @@ math.ln
 math.exp
 math.random
 math.sqrt
-string.interpolate
 string.toupper
-string.tolower
-string.trim
-string.reverse
-string.split
 moi.kissa
 `
 
@@ -449,25 +444,48 @@ moi.kissa
 		expectedType    token.Type
 		expectedLiteral string
 	}{
-		{token.IDENT, "os.getenv"},
-		{token.IDENT, "os.setenv"},
-		{token.IDENT, "os.environment"},
-		{token.IDENT, "directory.glob"},
-		{token.IDENT, "math.abs"},
-		{token.IDENT, "math.sin"},
-		{token.IDENT, "math.cos"},
-		{token.IDENT, "math.tan"},
-		{token.IDENT, "math.log"},
-		{token.IDENT, "math.ln"},
-		{token.IDENT, "math.exp"},
-		{token.IDENT, "math.random"},
-		{token.IDENT, "math.sqrt"},
-		{token.IDENT, "string.interpolate"},
-		{token.IDENT, "string.toupper"},
-		{token.IDENT, "string.tolower"},
-		{token.IDENT, "string.trim"},
-		{token.IDENT, "string.reverse"},
-		{token.IDENT, "string.split"},
+		{token.IDENT, "os"},
+		{token.PERIOD, "."},
+		{token.IDENT, "getenv"},
+		{token.IDENT, "os"},
+		{token.PERIOD, "."},
+		{token.IDENT, "setenv"},
+		{token.IDENT, "os"},
+		{token.PERIOD, "."},
+		{token.IDENT, "environment"},
+		{token.IDENT, "directory"},
+		{token.PERIOD, "."},
+		{token.IDENT, "glob"},
+		{token.IDENT, "math"},
+		{token.PERIOD, "."},
+		{token.IDENT, "abs"},
+		{token.IDENT, "math"},
+		{token.PERIOD, "."},
+		{token.IDENT, "sin"},
+		{token.IDENT, "math"},
+		{token.PERIOD, "."},
+		{token.IDENT, "cos"},
+		{token.IDENT, "math"},
+		{token.PERIOD, "."},
+		{token.IDENT, "tan"},
+		{token.IDENT, "math"},
+		{token.PERIOD, "."},
+		{token.IDENT, "log"},
+		{token.IDENT, "math"},
+		{token.PERIOD, "."},
+		{token.IDENT, "ln"},
+		{token.IDENT, "math"},
+		{token.PERIOD, "."},
+		{token.IDENT, "exp"},
+		{token.IDENT, "math"},
+		{token.PERIOD, "."},
+		{token.IDENT, "random"},
+		{token.IDENT, "math"},
+		{token.PERIOD, "."},
+		{token.IDENT, "sqrt"},
+		{token.IDENT, "string"},
+		{token.PERIOD, "."},
+		{token.IDENT, "toupper"},
 		{token.IDENT, "moi"},
 		{token.PERIOD, "."},
 		{token.IDENT, "kissa"},
