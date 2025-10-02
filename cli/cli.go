@@ -52,7 +52,7 @@ func Execute(input string) error {
 		for _, msg := range p.Errors() {
 			sb.WriteString(fmt.Sprintf("\t%s\n", msg))
 		}
-		return fmt.Errorf(sb.String())
+		return fmt.Errorf("%s", sb.String())
 	}
 
 	// Register a function called version()

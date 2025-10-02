@@ -75,7 +75,7 @@ func evalFun(env *object.Environment, args ...object.Object) object.Object {
 		for _, msg := range p.Errors() {
 			sb.WriteString(fmt.Sprintf("\t%s\n", msg))
 		}
-		return newError(sb.String())
+		return newError("%s", sb.String())
 	}
 	return newError("argument to `eval` not supported, got=%s",
 		args[0].Type())
@@ -624,7 +624,7 @@ func includeFile(env *object.Environment, args ...object.Object) object.Object {
 			for _, msg := range p.Errors() {
 				sb.WriteString(fmt.Sprintf("\t%s\n", msg))
 			}
-			return newError(sb.String())
+			return newError("%s", sb.String())
 		}
 	}
 	return newError("Unable to open file %s", importFileName)

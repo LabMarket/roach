@@ -38,7 +38,6 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 // EvalContext is our core function for evaluating nodes.
 // The context.Context provided can be used to cancel a running script instance.
 func EvalContext(ctx context.Context, node ast.Node, env *object.Environment) object.Object {
-
 	//
 	// We test our context at every iteration of our main-loop.
 	//
@@ -296,7 +295,6 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 }
 
 func evalInfixExpression(operator string, left, right object.Object, env *object.Environment) object.Object {
-
 	// Found by fuzzing
 	if left == nil || right == nil {
 		return newError("null operand %v %v", left, right)
@@ -339,7 +337,6 @@ func evalInfixExpression(operator string, left, right object.Object, env *object
 }
 
 func matches(left, right object.Object, env *object.Environment) object.Object {
-
 	str := left.Inspect()
 
 	if right.Type() != object.REGEXP_OBJ {
@@ -353,7 +350,6 @@ func matches(left, right object.Object, env *object.Environment) object.Object {
 
 	// Compile the regular expression.
 	r, err := regexp.Compile(val)
-
 	// Ensure it compiled
 	if err != nil {
 		return newError("error compiling regexp '%s': %s", right.Inspect(), err)
@@ -390,7 +386,6 @@ func notMatches(left, right object.Object) object.Object {
 
 	// Compile the regular expression.
 	r, err := regexp.Compile(val)
-
 	// Ensure it compiled
 	if err != nil {
 		return newError("error compiling regexp '%s': %s", right.Inspect(), err)
@@ -512,6 +507,7 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 			left.Type(), operator, right.Type())
 	}
 }
+
 func evalFloatInfixExpression(operator string, left, right object.Object) object.Object {
 	leftVal := left.(*object.Float).Value
 	rightVal := right.(*object.Float).Value
@@ -703,7 +699,6 @@ func evalIfExpression(ctx context.Context, ie *ast.IfExpression, env *object.Env
 // the false-branch.  (Unlike an `if` statement we know that we always have
 // an alternative/false branch.)
 func evalTernaryExpression(ctx context.Context, te *ast.TernaryExpression, env *object.Environment) object.Object {
-
 	condition := EvalContext(ctx, te.Condition, env)
 	if isError(condition) {
 		return condition
@@ -812,7 +807,6 @@ func evalAssignStatement(ctx context.Context, a *ast.AssignStatement, env *objec
 }
 
 func evalSwitchStatement(ctx context.Context, se *ast.SwitchExpression, env *object.Environment) object.Object {
-
 	// Get the value.
 	obj := EvalContext(ctx, se.Value, env)
 
@@ -857,7 +851,6 @@ func evalSwitchStatement(ctx context.Context, se *ast.SwitchExpression, env *obj
 
 	// No match?  Handle default if present
 	for _, opt := range se.Choices {
-
 		// skip default
 		if opt.Default {
 
@@ -890,7 +883,6 @@ func evalForLoopExpression(ctx context.Context, fle *ast.ForLoopExpression, env 
 
 // handle "for x [,y] in .."
 func evalForeachExpression(ctx context.Context, fle *ast.ForeachStatement, env *object.Environment) object.Object {
-
 	// expression
 	val := EvalContext(ctx, fle.Value, env)
 
@@ -994,7 +986,7 @@ func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object
 	if PRAGMAS["strict"] == 1 {
 		os.Exit(1)
 	}
-	return newError("identifier not found: " + node.Value)
+	return newError("%s", "identifier not found: "+node.Value)
 }
 
 func evalExpression(ctx context.Context, exps []ast.Expression, env *object.Environment) []object.Object {
@@ -1138,7 +1130,6 @@ func createCommandExecHash(stdoutObj, stderrObj, errorObj object.Object) object.
 }
 
 func evalIndexExpression(left, index object.Object) object.Object {
-
 	// Found by fuzzing
 	if left == nil || index == nil {
 		return newError("null operand %v[%v]", left, index)
@@ -1166,6 +1157,7 @@ func evalArrayIndexExpression(array, index object.Object) object.Object {
 	}
 	return arrayObject.Elements[idx]
 }
+
 func evalHashIndexExpression(hash, index object.Object) object.Object {
 	hashObject := hash.(*object.Hash)
 	key, ok := index.(object.Hashable)
@@ -1222,11 +1214,9 @@ func evalHashLiteral(ctx context.Context, node *ast.HashLiteral, env *object.Env
 
 	}
 	return &object.Hash{Pairs: pairs}
-
 }
 
 func applyFunction(ctx context.Context, env *object.Environment, fn object.Object, args []object.Object) object.Object {
-
 	// Found by fuzzing
 	if fn == nil {
 		return newError("impossible empty body on function-call")
@@ -1241,7 +1231,6 @@ func applyFunction(ctx context.Context, env *object.Environment, fn object.Objec
 	default:
 		return newError("not a function: %s", fn.Type())
 	}
-
 }
 
 func extendFunctionEnv(ctx context.Context, fn *object.Function, args []object.Object) *object.Environment {
@@ -1274,7 +1263,6 @@ func RegisterBuiltin(name string, fun object.BuiltinFunction) {
 
 // evalObjectCallExpression invokes methods against objects.
 func evalObjectCallExpression(ctx context.Context, call *ast.ObjectCallExpression, env *object.Environment) object.Object {
-
 	obj := EvalContext(ctx, call.Object, env)
 
 	if obj == nil {

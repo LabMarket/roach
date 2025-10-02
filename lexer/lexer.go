@@ -333,6 +333,8 @@ func (l *Lexer) readIdentifier() string {
 	// Functions which are permitted to have dots in their name.
 	//
 	valid := map[string]bool{
+		"csv.read":           true,
+		"csv.write":          true,
 		"directory.glob":     true,
 		"math.abs":           true,
 		"math.sin":           true,

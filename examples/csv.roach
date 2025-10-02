@@ -1,0 +1,58 @@
+#!/usr/bin/env roach
+
+// Create a 2D array of data.
+let data = [
+    ["name", "age", "city"],
+    ["peter", "34", "london"],
+    ["mary", "29", "paris"],
+    ["john", "42", "new york"]
+];
+
+puts("Initial data:", data, "\n");
+
+// Write the data to a new CSV file.
+puts("Writing initial data to test.csv...");
+csv.write("test.csv", data);
+
+// Read the data back from the file and print it.
+puts("Reading data from test.csv:");
+let read_data = csv.read("test.csv");
+puts(read_data);
+
+// -- UPDATE a value --
+// Arrays are immutable. To "change" a value, you must create a new array.
+// Here, we'll change "paris" to "berlin" in row 2, column 2.
+
+puts("\nUpdating data by creating a new array...");
+
+// 1. Create an empty array to hold the new data.
+let new_data = [];
+
+// 2. Loop over the original data.
+foreach i, row in read_data {
+    puts("\n", "reading row", i, ":", row);
+
+    // 3. If this is the row we want to change (row index 2)
+    if (i == 2) {
+        // 4. Create a new, modified row.
+        let new_row = [row[0], row[1], "berlin"];
+        // 5. Push the new row into our new data set.
+        new_data = push(new_data, new_row);
+        puts("\n", "writing new row: ", new_row);
+    } else {
+        // 6. Otherwise, just push the original row.
+        new_data = push(new_data, row);
+        puts("\n", "writing old row; ", row);
+    }
+}
+
+puts("\n","New data", new_data);
+
+// Write the newly created data structure back to the same file.
+puts("Writing updated data back to test.csv...");
+csv.write("test.csv", new_data);
+
+// Read the file again to verify the update.
+puts("\nReading updated data from test.csv:");
+let final_data = csv.read("test.csv");
+puts(final_data);

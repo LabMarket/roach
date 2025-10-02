@@ -3,6 +3,7 @@ package evaluator
 import (
 	"context"
 	"math"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -72,6 +73,7 @@ func testDecimalObject(t *testing.T, obj object.Object, expected interface{}) bo
 		return false
 	}
 }
+
 func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
 	result, ok := obj.(*object.Integer)
 	if !ok {
@@ -85,6 +87,7 @@ func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
 	}
 	return true
 }
+
 func testFloatObject(t *testing.T, obj object.Object, expected float64) bool {
 	result, ok := obj.(*object.Float)
 	if !ok {
@@ -98,6 +101,7 @@ func testFloatObject(t *testing.T, obj object.Object, expected float64) bool {
 	}
 	return true
 }
+
 func testStringObject(t *testing.T, obj object.Object, expected string) bool {
 	result, ok := obj.(*object.String)
 	if !ok {
@@ -515,12 +519,12 @@ func TestStringIndexExpression(t *testing.T) {
 			if ok {
 				testStringObject(t, evaluated, str)
 			} else {
-
 				testNullObject(t, evaluated)
 			}
 		}
 	}
 }
+
 func TestHashLiterals(t *testing.T) {
 	input := `let two="two";
 	{
@@ -555,7 +559,6 @@ func TestHashLiterals(t *testing.T) {
 		}
 		testDecimalObject(t, pair.Value, expectedValue)
 	}
-
 }
 
 func TestHashIndexExpression(t *testing.T) {
@@ -683,7 +686,6 @@ for ( true ) {
 	if !strings.Contains(errObj.Message, "deadline") {
 		t.Errorf("got error, but wasn't timeout: %s", errObj.Message)
 	}
-
 }
 
 // Test90 tests hash-key iteration, which was reported in #90
@@ -712,7 +714,6 @@ return total;
 
 		count++
 	}
-
 }
 
 // TestIssue94 tests #94 - that malformed regexps are caught
@@ -745,7 +746,6 @@ if (match( "+", name) ) { puts( "Hello\n" ); }
 	if !strings.Contains(er2.Inspect(), "parsing regexp") {
 		t.Errorf("Got an error, but not the right one:%v", er2.Inspect())
 	}
-
 }
 
 func TestRangeOperator(t *testing.T) {
@@ -786,5 +786,58 @@ func TestBackTickOperation(t *testing.T) {
 		if !strings.Contains(evaluated.Inspect(), tt.expected) {
 			t.Fatalf("unexpected output for back tick operation, got %s for input %s", evaluated.Inspect(), tt.input)
 		}
+	}
+}
+
+func TestCSVFunctions(t *testing.T) {
+	t.Cleanup(func() {
+		os.Remove("test.csv")
+	})
+
+	// Test case 1: Successful write and read
+	input1 := `
+		let data = [["name", "age"], ["john", "30"]];
+		csv.write("test.csv", data);
+		let result = csv.read("test.csv");
+		result;
+	`
+	evaluated1 := testEval(input1)
+	array, ok := evaluated1.(*object.Array)
+	if !ok {
+		t.Fatalf("csv.read should return an array. got=%T (%+v)", evaluated1, evaluated1)
+	}
+
+	if len(array.Elements) != 2 {
+		t.Fatalf("Expected 2 rows, got %d", len(array.Elements))
+	}
+
+	row1 := array.Elements[0].(*object.Array)
+	testStringObject(t, row1.Elements[0], "name")
+	testStringObject(t, row1.Elements[1], "age")
+
+	row2 := array.Elements[1].(*object.Array)
+	testStringObject(t, row2.Elements[0], "john")
+	testStringObject(t, row2.Elements[1], "30")
+
+	// Test case 2: Read non-existent file
+	input2 := `csv.read("non_existent_file.csv")`
+	evaluated2 := testEval(input2)
+	err, ok := evaluated2.(*object.Error)
+	if !ok {
+		t.Fatalf("Expected an error for non-existent file, got %T", evaluated2)
+	}
+	if !strings.Contains(err.Message, "could not open file") {
+		t.Errorf("Wrong error message for non-existent file. got=%q", err.Message)
+	}
+
+	// Test case 3: Write with incorrect arguments
+	input3 := `csv.write("test.csv", 123)`
+	evaluated3 := testEval(input3)
+	err, ok = evaluated3.(*object.Error)
+	if !ok {
+		t.Fatalf("Expected an error for wrong argument type, got %T", evaluated3)
+	}
+	if !strings.Contains(err.Message, "second argument to `csv.write` must be ARRAY") {
+		t.Errorf("Wrong error message for wrong argument type. got=%q", err.Message)
 	}
 }

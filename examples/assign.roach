@@ -19,3 +19,20 @@ puts("X:", x, "\n" );
 //
 yfds = 33.312;
 puts("X:", yfds, "\n" );
+
+let aa = [1, 2, 3];
+let ab = ["a", "b", "c"];
+let ac = [aa, ab]
+
+
+puts(aa);
+puts(ab);
+puts(ac);
+
+let data = [
+    ["name", "age", "city"],
+    ["peter", "34", "london"],
+    ["mary", "29", "paris"],
+    ["john", "42", "new york"]
+];
+puts(data);
