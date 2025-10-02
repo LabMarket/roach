@@ -41,10 +41,18 @@ func argsFun(args ...object.Object) object.Object {
 
 // Execute the supplied string as a program.
 func Execute(input string) error {
-	cliModule := &object.Module{
-		Name:    "cli",
-		Members: make(map[string]object.Object),
-	}
+	// Register a function called version()
+	// that the script can call.
+	evaluator.RegisterBuiltin("version",
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
+			return (versionFun(args...))
+		}})
+
+	// Access to the command-line arguments
+	evaluator.RegisterBuiltin("args",
+		&object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
+			return (argsFun(args...))
+		}})
 
 	env := object.NewEnvironment()
 	l := lexer.New(input)
@@ -59,20 +67,18 @@ func Execute(input string) error {
 		return fmt.Errorf("%s", sb.String())
 	}
 
-	// Register a function called version()
-	// that the script can call.
-	cliModule.Members["version"] = &object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
-		return (versionFun(args...))
-	}}
-	// Access to the command-line arguments
-	cliModule.Members["args"] = &object.Builtin{Fn: func(env *object.Environment, args ...object.Object) object.Object {
-		return (argsFun(args...))
-	}}
-	evaluator.RegisterBuiltin("cli", cliModule)
-
 	//
 	//  Parse and evaluate our standard-library.
 	//
+	/*
+		TODO: 	temos um problema aqui
+				não estamos corretamente registrando a lib 100% pure roach
+				e então evaluator.Eval(initProg, env) vai disparar o erro:
+					ERROR: impossible empty body on function-call
+				ou, caso execute uma das funções em cli/data/stdlib.roach que
+				use `self` vai disparar o erro:
+					identifier not found: self
+	*/
 	initL := lexer.New(stdlib)
 	initP := parser.New(initL)
 	initProg := initP.ParseProgram()
