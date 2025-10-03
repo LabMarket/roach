@@ -7,8 +7,7 @@ import (
 )
 
 // os.getenv() -> ( Hash )
-func envFun(args ...object.Object) object.Object {
-
+func envFun(_ ...object.Object) object.Object {
 	env := os.Environ()
 	newHash := make(map[object.HashKey]object.HashPair)
 
@@ -42,7 +41,6 @@ func getEnvFun(args ...object.Object) object.Object {
 	}
 	input := args[0].(*object.String).Value
 	return &object.String{Value: os.Getenv(input)}
-
 }
 
 // os.setenv( "PATH", "/home/LabMarket/bin:/usr/bin" );
@@ -68,7 +66,7 @@ func setEnvFun(args ...object.Object) object.Object {
 func init() {
 	// Create the module
 	osModule := &object.Module{
-		Name: "os",
+		Name:    "os",
 		Members: make(map[string]object.Object),
 	}
 

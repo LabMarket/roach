@@ -25,12 +25,12 @@ var version = "master/unreleased"
 var stdlib string
 
 // Implemention of "version()" function.
-func versionFun(args ...object.Object) object.Object {
+func versionFun(_ ...object.Object) object.Object {
 	return &object.String{Value: version}
 }
 
 // Implemention of "args()" function.
-func argsFun(args ...object.Object) object.Object {
+func argsFun(_ ...object.Object) object.Object {
 	l := len(os.Args[1:])
 	result := make([]object.Object, l)
 	for i, txt := range os.Args[1:] {
@@ -88,7 +88,7 @@ func Execute(input string) error {
 	//  Now evaluate the code the user wanted to load.
 	//
 	//  Note that here our environment will still contain
-	// the code we just loaded from our data-resource
+	// the code we just loaded from our data-resource5
 	//
 	//  (i.e. Our roach-based standard library.)
 	//

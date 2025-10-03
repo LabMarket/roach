@@ -32,7 +32,7 @@ func mathAbs(args ...object.Object) object.Object {
 }
 
 // val = math.random()
-func mathRandom(args ...object.Object) object.Object {
+func mathRandom(_ ...object.Object) object.Object {
 	return &object.Float{Value: rand.Float64()}
 }
 
@@ -42,6 +42,7 @@ func mathSqrt(args ...object.Object) object.Object {
 		return newError("wrong number of arguments. got=%d, want=1",
 			len(args))
 	}
+
 	switch arg := args[0].(type) {
 	case *object.Integer:
 		v := arg.Value
