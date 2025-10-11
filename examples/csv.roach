@@ -56,3 +56,5 @@ csv.write("test.csv", new_data);
 puts("\nReading updated data from test.csv:");
 let final_data = csv.read("test.csv");
 puts(final_data);
+
+remove("test.csv");
