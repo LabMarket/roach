@@ -84,7 +84,11 @@ func Execute(input string) error {
 	//
 	//  (i.e. Our roach-based standard library.)
 	//
-	evaluator.Eval(program, env)
+	evaluated := evaluator.Eval(program, env)
+	if evaluated != nil && evaluated.Type() == object.ERROR_OBJ {
+		fmt.Fprintf(os.Stderr, "%s\n", evaluated.Inspect())
+	}
+
 	return nil
 }
 

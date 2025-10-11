@@ -616,8 +616,11 @@ func includeFile(env *object.Environment, args ...object.Object) object.Object {
 			p := parser.New(l)
 			program := p.ParseProgram()
 			if len(p.Errors()) == 0 {
-				Eval(program, env)
-				return nil
+				rt := Eval(program, env)
+				if isError(rt) {
+					return rt
+				}
+				return NULL
 			}
 			var sb strings.Builder
 			sb.WriteString(fmt.Sprintf("Error parsing include-file '%s':\n", importFile))
