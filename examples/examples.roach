@@ -1,0 +1,13 @@
+#!/usr/bin/env roach
+
+let es = directory.glob("*.roach");
+foreach e in es {
+    if( e != "examples.roach" ) {
+        puts( "=".repeat(80), "\n" );
+        let p = e.split(".")[0];
+        puts( " Running ", p, "...\n" );
+        puts( "-".repeat(80), "\n" );
+        run( p );
+        puts( "-".repeat(80), "\n" );
+    }
+}
