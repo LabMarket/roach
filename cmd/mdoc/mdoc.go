@@ -4,7 +4,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -48,7 +47,7 @@ func genDoc(filename string, cfg doc.Config) {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	f, err := ioutil.ReadFile(wd + "/" + filename)
+	f, err := os.ReadFile(wd + "/" + filename)
 	if err != nil {
 		fmt.Println("roach: ", err.Error())
 		os.Exit(1)
@@ -146,7 +145,7 @@ func main() {
 		doc.Cfg.GenHTML = 1
 
 		if cssFile != "" {
-			cssContents, err := ioutil.ReadFile(cssFile)
+			cssContents, err := os.ReadFile(cssFile)
 			if err != nil {
 				fmt.Println("Error reading css file: ", err.Error())
 				//do not exits
