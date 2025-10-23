@@ -1,10 +1,6 @@
-<p align="center">
-    <img alt="roach language logo" src="https://github.com/haifenghuang/roach/blob/master/roach.png?raw=true" width="310">
-</p>
-
 # Roach Programming Language
 
-Chinese version: [中文](README_cn.md)
+This is a fork from https://github.com/haifenghuang/magpie language interpreter.
 
 ## Summary
 
@@ -21,8 +17,6 @@ It has a simple debugger which you can experience with it.
 It also has a REPL with realtime syntax highlighter.
 
 I also made a simple programming language written using `roach`.
-
-You can even run most of the `roach` script in a web browser.
 
 ## Documention
 
@@ -905,8 +899,11 @@ so i could put you in the `Credits` sections.
 
 ## Credits
 
+* magpie:
+    This project is forked from haifenghuang's [magpie](https://github.com/haifenghuang/magpie) interpreter.
+    
 * mayoms:
-    This project is based on mayoms's [monkey](https://github.com/mayoms/monkey) interpreter.
+    The original project is based on mayoms's [monkey](https://github.com/mayoms/monkey) interpreter.
 
 * ahmetb：
     Linq module is base on ahmetb's [linq](https://github.com/ahmetb/go-linq)
