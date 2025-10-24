@@ -1,7 +1,5 @@
 # Roach Programming Language
 
-Chinese version: [中文](README_cn.md)
-
 Table of Contents
 =================
 <details><summary>TOC</summary>
@@ -164,11 +162,6 @@ Property 'FirstName' not valid!
 Property 'LastName' not valid!
 ```
 
-
-Below is the REPL with real time syntax highlight:
-
-![REPL](REPL.gif)
-
 Below is the html document generated using the `mdoc` tool:
 
 ![HTML DOC](doc.png)
@@ -208,7 +201,7 @@ There are a number of tasks to complete, as well as a number of bugs. The purpos
 
 ## Installation
 
-Just download the repository and run `./run.sh`
+Just download the repository, run `go build` and you'll have a binary named `roach`.
 
 ## Basic use
 
@@ -218,7 +211,7 @@ To access the REPL, simply run the following:
 ~ » roach
 Roach programming language REPL
 
->>
+roach>>
 ```
 
 or, to run a program:
@@ -358,7 +351,7 @@ let (j, k, l) = {"j": 50, "l": "good"}
 
 ```
 
-Note：Starting from Roach 5.0，when the decalared variable already exists, it's value will be overwritten:
+Note：When the decalared variable already exists, it's value will be overwritten:
 
 ```swift
 let x, y = 10, 20;
@@ -1547,7 +1540,7 @@ class Vector {
     }
 
     fn +(v) { //overloading '+'
-        if (type(v) == "INTEGER" {
+        if type(v) == "INTEGER" {
             return new Vector(x + v, y + v);
         } elif v.is_a(Vector) {
             return new Vector(x + v.x, y + v.y);
@@ -2738,18 +2731,6 @@ The `sql` module provides a lower abstraction layer for working with database.
 
 It should correctly handle database null values, though not thoroughly tested.
 
-For testing `sql` module, you need to do following:
-
-1. Download sql driver source.
-
-2. Include the package in 'sql.go' like below:
-
-```go
-    _ "github.com/mattn/go-sqlite3"
-```
-
-3. Recompile roach source.
-
 Below is a complete source of the `examples/db.roach`:
 
 ```swift
@@ -2927,25 +2908,9 @@ Because github can not render html directly, you could use(http://htmlpreview.gi
 
 Currently there are below kinds of syntax highlight for editors:
 
-1. vim
+1. Visual Studio Code
 
-    [vim](misc/vim)
-
-2. emeditor
-
-    [emeditor](misc/emeditor)
-
-3. notepad++
-
-    [notepad++](misc/notepad%2B%2B)
-
-4. Visual Studio Code
-
-    [VSC](misc/vscode)
-
-5. Sublime Text 3
-
-    [Sublime Text 3](misc/SublimeText3)
+    [VSC](vscode)
 
 ## Future Plans
 
