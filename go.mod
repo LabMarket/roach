@@ -2,7 +2,10 @@ module roach
 
 go 1.25.3
 
-require github.com/peterh/liner v1.2.2
+require (
+	github.com/mattn/go-sqlite3 v1.14.32
+	github.com/peterh/liner v1.2.2
+)
 
 require (
 	github.com/mattn/go-runewidth v0.0.3 // indirect
