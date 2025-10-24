@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 //This file demonstrate class property
 class Date {
     let month = 7;  // Backing store

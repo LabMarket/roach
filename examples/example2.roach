@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 # Test for function default parameter and variadic parameters
 add = fn (x, y=5,z=7, args...) {
 	w = x + y + z

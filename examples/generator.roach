@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 fn process(tasks) {
   ch = chan()
   spawn fn() {

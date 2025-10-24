@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 d1 = decimal.fromString("123.45678901234567")
 d2 = decimal.fromFloat(3)
 decimal.setDivisionPrecision(50)

@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 //test 'from'
 let fromArr = [1,2,3,4,5,6,7,8,9,10]
 lq = linq.from(fromArr)
@@ -1051,7 +1053,7 @@ if aMap == result {
 
 
 //test: linq for "file"
-file = newFile("./examples/linqSample.csv", "r") //open linqSample.csv file for reading
+file = newFile("./linqSample.csv", "r") //open linqSample.csv file for reading
 result = linq.from(file,",",fn(line){ //the second parameter is field separator, the third is a selector function
 	if line.trim().hasPrefix("#") { //if line start '#'
 		return true // return 'true' means we ignore this line
@@ -1069,7 +1071,7 @@ println(result)
 file.close() //do not forget to clsoe the file
 
 //another test: linq for "file"
-file = newFile("./examples/linqSample.csv", "r") //open linqSample.csv file for reading
+file = newFile("./linqSample.csv", "r") //open linqSample.csv file for reading
 result = linq.from(file,",",fn(line){ //the second parameter is field separator, the third is a selector function
 	if line.trim().hasPrefix("#") { //if line start '#'
 		return true //return 'true' means we ignore this line
@@ -1089,7 +1091,7 @@ file.close() //do not forget to close the file
 
 
 //test: linq for "csv"
-r = newCsvReader("./examples/test.csv") //open test.csv file for reading
+r = newCsvReader("./test.csv") //open test.csv file for reading
 r.setOptions({"Comma":";", "Comment":"#"})
 result = linq.from(r).where(fn(x) {
 	x[2] == "Pike"//only 2nd Field = "Pike"

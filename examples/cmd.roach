@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 if (RUNTIME_OS == "linux") {
 	var = "~"
 	out = `ls -la $var`

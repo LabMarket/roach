@@ -1,4 +1,5 @@
-//#!/usr/bin/roach
+#!/usr/bin/env roach
+
 # Using 'let'(optional) to declare variable
 # functio as a first-class object
 let add  =  fn(x,y){

@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 //datetime literal
 let month = "01"
 let dt1 = dt/2018-{month}-01 12:01:00/

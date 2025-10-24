@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 /*
  *  A Persion class which has three private variable:
  ** firstName

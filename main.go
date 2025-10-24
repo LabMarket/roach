@@ -11,11 +11,11 @@ import (
 	"runtime"
 	"time"
 
-	"LabMarket/roach/eval"
-	"LabMarket/roach/lexer"
-	"LabMarket/roach/message"
-	"LabMarket/roach/parser"
-	"LabMarket/roach/repl"
+	"roach/eval"
+	"roach/lexer"
+	"roach/message"
+	"roach/parser"
+	"roach/repl"
 )
 
 func runProgram(debug bool, filename string) {

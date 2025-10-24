@@ -1,4 +1,6 @@
-//#!/usr/bin/roach
+#!/usr/bin/env roach
+
+#!/usr/bin/env roach
 const a = 3.14159
 //a = 3.14 //error
 printf("PI=%f\n", a)

@@ -1,5 +1,7 @@
+#!/usr/bin/env roach
+
 fn() {
-	let response = http.get("http://localhost:8080/hello")
+	let response = http.post("http://localhost:9090/todos/new?todo=test")
 	defer response.closeBody()
 	let body = response.readAll()
 	println(body)

@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 if ().empty() { //() is a tuple
     println("TRUE")
 } else {

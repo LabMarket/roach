@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 fn generator() {
   ch = chan()
   n = 0
@@ -12,7 +14,7 @@ fn generator() {
 }
 
 for i in generator() {
-  if i== 15 break
+  if i== 15 { break }
   fmt.println(i)
 }
 

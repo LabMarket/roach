@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 // Here we use 'using' statement, so we do not need to call infile.close().
 // When finished running 'using' statement, it will automatically call infile.close().
 using (infile = newFile("./file.demo", "r")) {

@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 # Test numbrer plus assignment
 num = 10
 num += 10 + 15.6
@@ -66,7 +68,7 @@ fmt.printf("Logger: flags =<%d>, prefix=<%s>\n", log.flags(), log.prefix())
 file = newFile("./logger.log", "a+")
 log.setOutput(file)
 for i in 1..5 {
-  log.printf("这是第<%d>个\n", i)
+  log.printf("Roach Language\n", i)
 }
 file.close() //do not forget to clsoe the file
 

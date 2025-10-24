@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 // A pseudo-class using function with closure
 fn Person(name, age) {
     self = {}

@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 let dbOp = fn() {
 	os.remove("./foo.db") //delete 'foo.db' file
 	let db = dbOpen("sqlite3", "./foo.db")

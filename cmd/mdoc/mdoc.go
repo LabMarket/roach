@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	doc "LabMarket/roach/docs"
-	"LabMarket/roach/lexer"
-	"LabMarket/roach/parser"
+	doc "roach/docs"
+	"roach/lexer"
+	"roach/parser"
 )
 
 func genDocs(path string, cfg doc.Config, isDir bool) {

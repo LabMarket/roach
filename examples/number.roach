@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 x = (-1).next()
 println(x) //0
 

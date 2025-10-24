@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 let a = 10
 
 fn printMe(msg) {

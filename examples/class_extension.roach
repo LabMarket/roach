@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 //This file demonstrate extension methods of class
 
 class Animal {

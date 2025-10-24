@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 let conn = dialTCP("tcp", "127.0.0.1:9090")
 if (conn == nil) {
     println("dailTCP failed, error:", conn.message())

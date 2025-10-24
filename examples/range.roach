@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 let a1 = 1.. 9
 println(a1)
 

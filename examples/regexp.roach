@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 # test regexp literal(regexp)
 let ww = /\d+/.match("12") //regular expression
 println(ww)  # true

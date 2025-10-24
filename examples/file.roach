@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 filename = "./file.log"
 
 fileread = fn() {
@@ -41,7 +43,7 @@ filewrite = fn() {
 
 	file.writeLine("This is the first line")
 	file.writeLine("This is the second line")
-	file.writeString("这是第三行\n")
+	file.writeString("This is the third line\n")
 	//Using 'fmt.fprintf' function to write to file
 	fmt.fprintf(file, "This is the %s line\n", "fourth")
 

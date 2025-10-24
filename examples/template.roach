@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 resultValue = ""
 //test using array
 arr = [
@@ -7,12 +9,12 @@ arr = [
 ]
 
 //use parseFiles(), write to a string
-template.parseTextFiles("./examples/looping.tmpl").execute(resultValue, arr)
+template.parseTextFiles("./looping.tmpl").execute(resultValue, arr)
 println('{resultValue}')
 
 //use parseFiles(), write to a file
-file = newFile("./examples/outTemplate.log", "a+")
-template.parseTextFiles("./examples/looping.tmpl").execute(file, arr)
+file = newFile("./outTemplate.log", "a+")
+template.parseTextFiles("./looping.tmpl").execute(file, arr)
 file.close() //do not forget to clsoe the file
 
 //use parse()

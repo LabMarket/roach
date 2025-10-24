@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 let handler = fn(writer, request) {
 	writer.write("Hello HTTP client, I'm server")
 }

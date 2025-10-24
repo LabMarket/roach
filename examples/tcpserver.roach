@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 let ln = listenTCP("tcp", ":9090")
 for {
     let conn = ln.acceptTCP()

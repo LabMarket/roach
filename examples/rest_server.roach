@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 /*
     Rest Service Example
     For more advanced example, please see 'service.roach'

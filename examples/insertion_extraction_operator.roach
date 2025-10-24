@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 // Output to stdout by using insertion operator("<<")
 // 'endl' is a predefined object, which is "\n".
 stdout << "hello " << "world!" << " How are you?" << endl;

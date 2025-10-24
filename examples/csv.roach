@@ -1,5 +1,7 @@
+#!/usr/bin/env roach
+
 //test csv reader
-let r = newCsvReader("./examples/test.csv")
+let r = newCsvReader("./test.csv")
 if r == nil {
     printf("newCsv returns err, message:%s\n", r.message())
 }
@@ -21,7 +23,7 @@ for line in ra {
 r.close() //do not forget to close the reader
 
 //test csv writer
-let ofile = newFile("./examples/demo.csv", "a+")
+let ofile = newFile("./demo.csv", "a+")
 //note:we do not test if the file is successfully opened or not, but in real code, you should do it
 
 let w = newCsvWriter(ofile)

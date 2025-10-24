@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 fn safeDivision?(a, b) {
     if (b == 0){
         return optional.empty();

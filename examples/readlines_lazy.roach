@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 // Readlines is an iterator that returns one line of a file at a time. 
 fn Readlines(file) {
 	ch = chan()

@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 gfmt.Printf("Hello %s!\n", "go function");
 gfmt.Printf("%v\n", gos.Args)
 

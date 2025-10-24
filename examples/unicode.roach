@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 // constant with mixed type runes
 mixed = "\b5Ὂg̀9! ℃ᾭG"
 for c in mixed {

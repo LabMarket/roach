@@ -1,3 +1,5 @@
+#!/usr/bin/env roach
+
 let todos = []
 let showToDo = fn(writer, request) {
 	writer.write("<html>")
