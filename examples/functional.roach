@@ -1,0 +1,90 @@
+#!/usr/bin/env roach
+
+//
+// This script contains some fnal programming examples.
+//
+// Launch this like so:
+//
+//  ~$ roach examples/fnal.roach
+//
+
+
+
+//
+// Return true if the given number is even
+//
+fn even?(n) {
+  return( n % 2 == 0 )
+}
+
+
+//
+// Return true if the given number is odd.
+//
+fn odd?(n) {
+  return( n % 2 == 1 )
+}
+
+
+/*
+ * Return true if the given number is prime
+ *
+ * Remember we can use multi-line comments too!
+ */
+fn prime?(n) {
+   // negative numbers are not prime
+   if ( n < 0 ) { return false  }
+
+   // 0, 1, 2 are prime
+   if ( n < 3 ) { return true  }
+
+   // Now the rest - we're testing all factors between 2 & SQRT(n).
+   for( i = int(math.sqrt(n)) + 1; i > 2 ; i-- ) {
+
+     if (n % i == 0) {
+        return false
+     }
+   }
+   return true
+}
+
+
+//
+// Square the given number.
+//
+fn square(n) { return n * n  }
+
+//
+// The list of numbers we'll operate upon.
+//
+let ints = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+             11, 12, 13, 14, 15, 16, 17, 18, 19, 20 ]
+
+// Show them ..
+println( "Integers:" )
+println( "\t", ints, "" )
+
+//
+// Show their squares ..
+//
+println( "Squares:" )
+println( "\t", ints.map(square), "")
+
+//
+// Show their cubes, using an anonymous fn
+//
+println( "Cubes:" )
+println( "\t", ints.map( fn(n) { return n * n * n }), "")
+println( "Cubes via POW:" )
+println( "\t", ints.map( fn(n) { return n ** 3 }), "")
+
+//
+// Now use our functional-methods to show odd/even/prime
+// numbers contained in our list.
+//
+println( "Odd numbers:" )
+println( "\t", ints.filter(odd?), "")
+println( "Even numbers:" )
+println( "\t", ints.filter( even?), "")
+println( "Prime numbers:" )
+println( "\t", ints.filter( prime?), "")
