@@ -1,0 +1,783 @@
+#!/usr/bin/env roach
+
+// ============================================================================
+// RESULT AND PROMISE IMPLEMENTATION AND TESTS FOR ROACH
+// ============================================================================
+// This file contains:
+// 1. Result class implementation
+// 2. Promise class implementation  
+// 3. Comprehensive test suite
+// 4. Usage examples
+// ============================================================================
+
+println("=" * 80)
+println("ROACH RESULT AND PROMISE TESTS")
+println("=" * 80)
+
+// ============================================================================
+// RESULT IMPLEMENTATION
+// ============================================================================
+
+class Result {
+    let value = nil
+    let error = nil
+    let isOk = false
+    
+    fn init(val, err) {
+        if (err == nil) {
+            this.value = val
+            this.error = nil
+            this.isOk = true
+        } else {
+            this.value = nil
+            this.error = err
+            this.isOk = false
+        }
+    }
+    
+    // Check if Result is Ok (success)
+    fn ok() { 
+        return this.isOk 
+    }
+    
+    // Get error (returns nil if Ok)
+    fn err() { 
+        return this.error 
+    }
+    
+    // Get value (throws if Error)
+    fn get() { 
+        if (!this.isOk) {
+            throw "Tried to get() from an error Result: " + this.error
+        }
+        return this.value 
+    }
+    
+    // Get value or return default
+    fn getOrElse(defaultVal) {
+        if (this.isOk) { 
+            return this.value 
+        }
+        return defaultVal
+    }
+    
+    // Transform value if Ok, propagate error otherwise
+    fn map(_fn) {
+        if (this.isOk) {
+            try {
+                return new Result(_fn(this.value), nil)
+            } catch e {
+                return new Result(nil, e)
+            }
+        }
+        return new Result(nil, this.error)
+    }
+    
+    // Chain operations that return Result
+    fn flatMap(_fn) {
+        if (this.isOk) {
+            try {
+                return _fn(this.value)
+            } catch e {
+                return new Result(nil, e)
+            }
+        }
+        return new Result(nil, this.error)
+    }
+    
+    // Pattern matching style handler
+    fn match(okFn, errFn) {
+        if (this.isOk) {
+            return okFn(this.value)
+        }
+        return errFn(this.error)
+    }
+    
+    // Convert to string for debugging
+    fn toString() {
+        if (this.isOk) {
+            return "Ok(" + str(this.value) + ")"
+        }
+        return "Err(" + str(this.error) + ")"
+    }
+}
+
+// Helper functions for creating Results
+fn Ok(value) {
+    return new Result(value, nil)
+}
+
+fn Err(error) {
+    return new Result(nil, error)
+}
+
+// ============================================================================
+// PROMISE IMPLEMENTATION
+// ============================================================================
+
+class Promise {
+    let ch = nil
+    let resolved = false
+    let result = nil
+    
+    fn init(executor) {
+        this.ch = chan()
+        
+        // Resolve and reject functions passed to executor
+        let resolve = fn(val) {
+            this.ch.send({"status": "fulfilled", "value": val})
+        }
+        
+        let reject = fn(err) {
+            this.ch.send({"status": "rejected", "reason": err})
+        }
+        
+        // Execute in separate thread
+        spawn fn() {
+            try {
+                executor(resolve, reject)
+            } catch e {
+                reject(e)
+            }
+        }()
+    }
+    
+    // Chain success handler
+    fn then(onFulfilled, onRejected) {
+        return new Promise(fn(resolve, reject) {
+            // Wait for this promise to resolve
+            if (!this.resolved) {
+                this.result = this.ch.recv()
+                this.resolved = true
+            }
+            
+            if (this.result["status"] == "fulfilled") {
+                if (onFulfilled != nil) {
+                    try {
+                        newVal = onFulfilled(this.result["value"])
+                        
+                        // If returned value is a Promise, chain it
+                        if (newVal != nil && newVal.instanceOf(Promise)) {
+                            innerResult = newVal.await()
+                            resolve(innerResult)
+                        } else {
+                            resolve(newVal)
+                        }
+                    } catch e {
+                        reject(e)
+                    }
+                } else {
+                    resolve(this.result["value"])
+                }
+            } else {
+                // Status is "rejected"
+                if (onRejected != nil) {
+                    try {
+                        recovered = onRejected(this.result["reason"])
+                        resolve(recovered)
+                    } catch e {
+                        reject(e)
+                    }
+                } else {
+                    reject(this.result["reason"])
+                }
+            }
+        })
+    }
+    
+    // Chain error handler
+    fn catch(onRejected) {
+        return this.then(nil, onRejected)
+    }
+    
+    // Block until promise resolves
+    fn await() {
+        if (!this.resolved) {
+            this.result = this.ch.recv()
+            this.resolved = true
+        }
+        
+        if (this.result["status"] == "fulfilled") {
+            return this.result["value"]
+        } else {
+            throw this.result["reason"]
+        }
+    }
+}
+
+// Helper functions for creating Promises
+fn resolved(value) {
+    return new Promise(fn(resolve, reject) {
+        resolve(value)
+    })
+}
+
+fn rejected(error) {
+    return new Promise(fn(resolve, reject) {
+        reject(error)
+    })
+}
+
+// ============================================================================
+// TEST UTILITIES
+// ============================================================================
+
+let testsPassed = 0
+let testsFailed = 0
+let currentTest = ""
+
+fn test(name, testFn) {
+    currentTest = name
+    printf("\n[TEST] %s\n", name)
+    
+    try {
+        testFn()
+        testsPassed++
+        println("  ✓ PASS")
+    } catch e {
+        testsFailed++
+        printf("  ✗ FAIL: %s\n", e)
+    }
+}
+
+fn assert(condition, message) {
+    if (!condition) {
+        throw "Assertion failed: " + message
+    }
+}
+
+fn assertEqual(actual, expected, message) {
+    if (actual != expected) {
+        throw message + " - Expected: " + str(expected) + ", Got: " + str(actual)
+    }
+}
+
+// ============================================================================
+// RESULT TESTS
+// ============================================================================
+
+println("\n" + "=" * 80)
+println("TESTING RESULT")
+println("=" * 80)
+
+test("Result: Create Ok value", fn() {
+    result = Ok(42)
+    assert(result.ok(), "Should be Ok")
+    assertEqual(result.get(), 42, "Value should be 42")
+    assert(result.err() == nil, "Error should be nil")
+})
+
+test("Result: Create Err value", fn() {
+    result = Err("something went wrong")
+    assert(!result.ok(), "Should not be Ok")
+    assertEqual(result.err(), "something went wrong", "Error message should match")
+})
+
+test("Result: get() throws on Err", fn() {
+    result = Err("error")
+    threw = false
+    try {
+        result.get()
+    } catch e {
+        threw = true
+    }
+    assert(threw, "Should throw when calling get() on Err")
+})
+
+test("Result: getOrElse with Ok", fn() {
+    result = Ok(10)
+    value = result.getOrElse(99)
+    assertEqual(value, 10, "Should return actual value")
+})
+
+test("Result: getOrElse with Err", fn() {
+    result = Err("error")
+    value = result.getOrElse(99)
+    assertEqual(value, 99, "Should return default value")
+})
+
+test("Result: map on Ok", fn() {
+    result = Ok(5)
+    mapped = result.map(fn(x) { x * 2 })
+    assert(mapped.ok(), "Mapped result should be Ok")
+    assertEqual(mapped.get(), 10, "Mapped value should be 10")
+})
+
+test("Result: map on Err propagates error", fn() {
+    result = Err("original error")
+    mapped = result.map(fn(x) { x * 2 })
+    assert(!mapped.ok(), "Mapped result should be Err")
+    assertEqual(mapped.err(), "original error", "Error should propagate")
+})
+
+test("Result: flatMap chains Ok results", fn() {
+    result = Ok(10)
+    chained = result.flatMap(fn(x) { 
+        return Ok(x + 5) 
+    })
+    assert(chained.ok(), "Chained result should be Ok")
+    assertEqual(chained.get(), 15, "Chained value should be 15")
+})
+
+test("Result: flatMap propagates Err", fn() {
+    result = Err("first error")
+    chained = result.flatMap(fn(x) { 
+        return Ok(x + 5) 
+    })
+    assert(!chained.ok(), "Chained result should be Err")
+    assertEqual(chained.err(), "first error", "Error should propagate")
+})
+
+test("Result: flatMap can convert Ok to Err", fn() {
+    result = Ok(0)
+    chained = result.flatMap(fn(x) {
+        if (x == 0) {
+            return Err("cannot be zero")
+        }
+        return Ok(100 / x)
+    })
+    assert(!chained.ok(), "Should convert to Err")
+    assertEqual(chained.err(), "cannot be zero", "Error message should match")
+})
+
+test("Result: match pattern with Ok", fn() {
+    result = Ok(42)
+    output = result.match(
+        fn(val) { return "success: " + val },
+        fn(err) { return "error: " + err }
+    )
+    assertEqual(output, "success: 42", "Should call success handler")
+})
+
+test("Result: match pattern with Err", fn() {
+    result = Err("failed")
+    output = result.match(
+        fn(val) { return "success: " + val },
+        fn(err) { return "error: " + err }
+    )
+    assertEqual(output, "error: failed", "Should call error handler")
+})
+
+// ============================================================================
+// PRACTICAL RESULT EXAMPLES
+// ============================================================================
+
+test("Result: Safe division", fn() {
+    fn safeDivide(x, y) {
+        if (y == 0) {
+            return Err("Division by zero")
+        }
+        return Ok(x / y)
+    }
+    
+    result1 = safeDivide(10, 2)
+    assert(result1.ok(), "10/2 should succeed")
+    assertEqual(result1.get(), 5, "10/2 should equal 5")
+    
+    result2 = safeDivide(10, 0)
+    assert(!result2.ok(), "10/0 should fail")
+    assertEqual(result2.err(), "Division by zero", "Error message should match")
+})
+
+test("Result: Chain multiple operations", fn() {
+    fn safeDivide(x, y) {
+        if (y == 0) { return Err("Division by zero") }
+        return Ok(x / y)
+    }
+    
+    fn safeSqrt(x) {
+        if (x < 0) { return Err("Negative number") }
+        // Roach doesn't have sqrt builtin, so we'll use a simple approximation
+        return Ok(x)  // Simplified for test
+    }
+    
+    result = safeDivide(100, 5)
+        .flatMap(fn(x) { return safeSqrt(x) })
+        .map(fn(x) { return x * 2 })
+    
+    assert(result.ok(), "Chained operations should succeed")
+})
+
+test("Result: Parse integer with validation", fn() {
+    fn parsePositiveInt(s) {
+        try {
+            num = int(s)
+            if (num <= 0) {
+                return Err("Number must be positive")
+            }
+            return Ok(num)
+        } catch e {
+            return Err("Invalid number format")
+        }
+    }
+    
+    result1 = parsePositiveInt("42")
+    assert(result1.ok(), "Valid positive number should parse")
+    assertEqual(result1.get(), 42, "Parsed value should be 42")
+    
+    result2 = parsePositiveInt("-5")
+    assert(!result2.ok(), "Negative number should fail")
+    
+    result3 = parsePositiveInt("abc")
+    assert(!result3.ok(), "Invalid format should fail")
+})
+
+// ============================================================================
+// PROMISE TESTS
+// ============================================================================
+
+println("\n" + "=" * 80)
+println("TESTING PROMISE")
+println("=" * 80)
+
+test("Promise: Resolve with value", fn() {
+    promise = new Promise(fn(resolve, reject) {
+        resolve(42)
+    })
+    
+    result = promise.await()
+    assertEqual(result, 42, "Promise should resolve with 42")
+})
+
+test("Promise: Reject with error", fn() {
+    promise = new Promise(fn(resolve, reject) {
+        reject("something failed")
+    })
+    
+    threw = false
+    try {
+        promise.await()
+    } catch e {
+        threw = true
+        assert(e == "something failed", "Error message should match")
+    }
+    assert(threw, "Promise should throw on reject")
+})
+
+test("Promise: then chains success", fn() {
+    promise = new Promise(fn(resolve, reject) {
+        resolve(10)
+    })
+    
+    result = promise
+        .then(fn(x) { return x * 2 }, nil)
+        .await()
+    
+    assertEqual(result, 20, "Chained promise should return 20")
+})
+
+test("Promise: catch handles rejection", fn() {
+    promise = new Promise(fn(resolve, reject) {
+        reject("error")
+    })
+    
+    result = promise
+        .catch(fn(err) { return "recovered: " + err })
+        .await()
+    
+    assertEqual(result, "recovered: error", "Should recover from error")
+})
+
+test("Promise: then with both handlers", fn() {
+    promise1 = new Promise(fn(resolve, reject) {
+        resolve(5)
+    })
+    
+    result1 = promise1
+        .then(
+            fn(x) { return x * 10 },
+            fn(e) { return -1 }
+        )
+        .await()
+    
+    assertEqual(result1, 50, "Success handler should be called")
+    
+    promise2 = new Promise(fn(resolve, reject) {
+        reject("failed")
+    })
+    
+    result2 = promise2
+        .then(
+            fn(x) { return x * 10 },
+            fn(e) { return -1 }
+        )
+        .await()
+    
+    assertEqual(result2, -1, "Error handler should be called")
+})
+
+test("Promise: resolved helper", fn() {
+    promise = resolved(100)
+    result = promise.await()
+    assertEqual(result, 100, "resolved() should create fulfilled promise")
+})
+
+test("Promise: rejected helper", fn() {
+    promise = rejected("test error")
+    threw = false
+    try {
+        promise.await()
+    } catch e {
+        threw = true
+        assertEqual(e, "test error", "Error should match")
+    }
+    assert(threw, "rejected() should create rejected promise")
+})
+
+test("Promise: Multiple await calls return same result", fn() {
+    promise = resolved(777)
+    result1 = promise.await()
+    result2 = promise.await()
+    
+    assertEqual(result1, 777, "First await should return 777")
+    assertEqual(result2, 777, "Second await should return same value")
+})
+
+// ============================================================================
+// PRACTICAL PROMISE EXAMPLES
+// ============================================================================
+
+test("Promise: Simulated async operation", fn() {
+    fn fetchData(id) {
+        return new Promise(fn(resolve, reject) {
+            // Simulate async work
+            if (id > 0) {
+                resolve({"id": id, "name": "User" + str(id)})
+            } else {
+                reject("Invalid ID")
+            }
+        })
+    }
+    
+    result = fetchData(123).await()
+    assertEqual(result["id"], 123, "Should fetch user with id 123")
+    assertEqual(result["name"], "User123", "Should have correct name")
+    
+    threw = false
+    try {
+        fetchData(-1).await()
+    } catch e {
+        threw = true
+    }
+    assert(threw, "Should reject invalid ID")
+})
+
+test("Promise: Chain multiple async operations", fn() {
+    fn getUser(id) {
+        return new Promise(fn(resolve, reject) {
+            resolve({"id": id, "addressId": id * 10})
+        })
+    }
+    
+    fn getAddress(addressId) {
+        return new Promise(fn(resolve, reject) {
+            resolve({"addressId": addressId, "city": "City" + str(addressId)})
+        })
+    }
+    
+    result = getUser(5)
+        .then(fn(user) {
+            return getAddress(user["addressId"])
+        }, nil)
+        .await()
+    
+    assertEqual(result["city"], "City50", "Should chain promises correctly")
+})
+
+// ============================================================================
+// INTEGRATION TESTS: RESULT + PROMISE
+// ============================================================================
+
+println("\n" + "=" * 80)
+println("TESTING RESULT + PROMISE INTEGRATION")
+println("=" * 80)
+
+test("Integration: Promise returning Result", fn() {
+    fn asyncDivide(x, y) {
+        return new Promise(fn(resolve, reject) {
+            if (y == 0) {
+                resolve(Err("Division by zero"))
+            } else {
+                resolve(Ok(x / y))
+            }
+        })
+    }
+    
+    result1 = asyncDivide(10, 2).await()
+    assert(result1.ok(), "Should succeed")
+    assertEqual(result1.get(), 5, "10/2 should equal 5")
+    
+    result2 = asyncDivide(10, 0).await()
+    assert(!result2.ok(), "Should fail")
+    assertEqual(result2.err(), "Division by zero", "Error should match")
+})
+
+test("Integration: Result wrapping Promise", fn() {
+    fn tryAsync(shouldSucceed) {
+        try {
+            promise = new Promise(fn(resolve, reject) {
+                if (shouldSucceed) {
+                    resolve(100)
+                } else {
+                    reject("async failed")
+                }
+            })
+            value = promise.await()
+            return Ok(value)
+        } catch e {
+            return Err(e)
+        }
+    }
+    
+    result1 = tryAsync(true)
+    assert(result1.ok(), "Should wrap successful promise")
+    assertEqual(result1.get(), 100, "Value should be 100")
+    
+    result2 = tryAsync(false)
+    assert(!result2.ok(), "Should wrap rejected promise")
+    assertEqual(result2.err(), "async failed", "Error should match")
+})
+
+// ============================================================================
+// COMPARISON WITH ROACH'S BUILT-IN OPTIONAL
+// ============================================================================
+
+println("\n" + "=" * 80)
+println("COMPARING WITH BUILT-IN OPTIONAL")
+println("=" * 80)
+
+test("Comparison: Optional vs Result", fn() {
+    // Using built-in Optional
+    fn findUserOptional(id) {
+        if (id == 123) {
+            return optional.of({"name": "Alice"})
+        }
+        return optional.empty()
+    }
+    
+    // Using our Result
+    fn findUserResult(id) {
+        if (id == 123) {
+            return Ok({"name": "Alice"})
+        }
+        return Err("User not found: " + str(id))
+    }
+    
+    // Optional: no error information
+    opt = findUserOptional(999)
+    assert(!opt.isPresent(), "Optional should be empty")
+    // We don't know WHY it failed
+    
+    // Result: includes error information  
+    res = findUserResult(999)
+    assert(!res.ok(), "Result should be Err")
+    assertEqual(res.err(), "User not found: 999", "Result includes error context")
+})
+
+// ============================================================================
+// REAL-WORLD SCENARIO TESTS
+// ============================================================================
+
+println("\n" + "=" * 80)
+println("REAL-WORLD SCENARIOS")
+println("=" * 80)
+
+test("Scenario: Configuration parsing with validation", fn() {
+    fn parseConfig(data) {
+        // Step 1: Parse JSON
+        try {
+            parsed = {"timeout": data["timeout"], "retries": data["retries"]}
+            Ok(parsed)
+        } catch e {
+            Err("JSON parse error: " + e)
+        }
+        
+        // Step 2: Validate timeout
+        result = result.flatMap(fn(config) {
+            if (config["timeout"] <= 0) {
+                return Err("Timeout must be positive")
+            }
+            return Ok(config)
+        })
+        
+        // Step 3: Validate retries
+        result = result.flatMap(fn(config) {
+            if (config["retries"] < 0 || config["retries"] > 10) {
+                return Err("Retries must be between 0 and 10")
+            }
+            return Ok(config)
+        })
+        
+        return result
+    }
+    
+    // Valid config
+    goodData = {"timeout": 30, "retries": 3}
+    result1 = parseConfig(goodData)
+    assert(result1.ok(), "Valid config should succeed")
+    
+    // Invalid timeout
+    badData1 = {"timeout": -5, "retries": 3}
+    result2 = parseConfig(badData1)
+    assert(!result2.ok(), "Invalid timeout should fail")
+    
+    // Invalid retries
+    badData2 = {"timeout": 30, "retries": 99}
+    result3 = parseConfig(badData2)
+    assert(!result3.ok(), "Invalid retries should fail")
+})
+
+test("Scenario: Async data pipeline", fn() {
+    fn loadData() {
+        return new Promise(fn(resolve, reject) {
+            // Simulate loading
+            resolve([1, 2, 3, 4, 5])
+        })
+    }
+    
+    fn processData(data) {
+        return new Promise(fn(resolve, reject) {
+            // Simulate processing
+            processed = []
+            for item in data {
+                processed += item * 2
+            }
+            resolve(processed)
+        })
+    }
+    
+    fn saveData(data) {
+        return new Promise(fn(resolve, reject) {
+            // Simulate saving
+            resolve("Saved " + str(len(data)) + " items")
+        })
+    }
+    
+    result = loadData()
+        .then(fn(data) { return processData(data) }, nil)
+        .then(fn(data) { return saveData(data) }, nil)
+        .await()
+    
+    assertEqual(result, "Saved 5 items", "Pipeline should complete successfully")
+})
+
+// ============================================================================
+// TEST SUMMARY
+// ============================================================================
+
+println("\n" + "=" * 80)
+println("TEST SUMMARY")
+println("=" * 80)
+
+totalTests = testsPassed + testsFailed
+printf("Total tests: %d\n", totalTests)
+printf("Passed: %d\n", testsPassed)
+printf("Failed: %d\n", testsFailed)
+
+if (testsFailed == 0) {
+    println("\n✓ ALL TESTS PASSED! ✓")
+} else {
+    println("\n✗ SOME TESTS FAILED ✗")
+}
+
+println("=" * 80)

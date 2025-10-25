@@ -103,12 +103,12 @@ func (d *Debugger) SetFunctions(functions map[string]*ast.FunctionLiteral) {
 }
 
 func (d *Debugger) ShowBanner() {
-	fmt.Println("                                    _     ")
-	fmt.Println("   ____ ___   ____ _ ____ _ ____   (_)___ ")
-	fmt.Println("  / __ `__ \\ / __ `// __ `// __ \\ / // _ \\")
-	fmt.Println(" / / / / / // /_/ // /_/ // /_/ // //  __/")
-	fmt.Println("/_/ /_/ /_/ \\__,_/ \\__, // .___//_/ \\___/ ")
-	fmt.Println("                  /____//_/             ")
+	fmt.Println("")
+	fmt.Println("    ____                   __")
+	fmt.Println("   / __ \\____  ____ ______/ /_")
+	fmt.Println("  / /_/ / __ \\/ __ `/ ___/ __ \\")
+	fmt.Println(" / _, _/ /_/ / /_/ / /__/ / / /")
+	fmt.Println("/_/ |_|\\____/\\__,_/\\___/_/ /_/")
 	fmt.Println("")
 }
 
