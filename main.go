@@ -16,6 +16,7 @@ import (
 	"roach/message"
 	"roach/parser"
 	"roach/repl"
+	"roach/version"
 )
 
 func runProgram(debug bool, filename string) {
@@ -221,7 +222,7 @@ func RegisterGoGlobals() {
 
 func main() {
 	args := os.Args[1:]
-	//We must reset `os.Args`, or the `flag` module will not functioning correctly
+	// We must reset `os.Args`, or the `flag` module will not functioning correctly
 	os.Args = os.Args[1:]
 	if len(args) == 0 {
 		fmt.Println("Roach programming language REPL\n")
@@ -234,9 +235,13 @@ func main() {
 				fmt.Println("Usage: roach -d file.roach")
 				os.Exit(1)
 			}
+		} else if args[0] == "-v" || args[0] == "--version" {
+			fmt.Println("Roach Language Interpreter")
+			fmt.Println("Version: ", version.Version)
+			fmt.Println("BuildNumber: ", version.BuildNumber)
+			os.Exit(0)
 		} else {
 			runProgram(false, args[0])
 		}
-
 	}
 }
