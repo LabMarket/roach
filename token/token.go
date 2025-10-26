@@ -8,11 +8,11 @@ const (
 	ILLEGAL TokenType = (iota - 1) // Illegal token
 	EOF
 
-	IDENT    //identifier
-	INT      //int literal
-	UINT     //unsigned int
-	FLOAT    //float literal
-	DATETIME //datetime
+	IDENT    // identifier
+	INT      // int literal
+	UINT     // unsigned int
+	FLOAT    // float literal
+	DATETIME // datetime
 
 	EQ         // ==
 	NEQ        // !=
@@ -113,17 +113,18 @@ const (
 	ENUM
 	QW
 	UNLESS
+	VERSION
 
-	//class related
-	INTERFACE //NOT IMPLEMENTED
+	// class related
+	INTERFACE // NOT IMPLEMENTED
 	CLASS
 	NEW
 	PROPERTY
 	GET
 	SET
-	PUBLIC    //NOT IMPLEMENTED
-	PRIVATE   //NOT IMPLEMENTED
-	PROTECTED //NOT IMPLEMENTED
+	PUBLIC    // NOT IMPLEMENTED
+	PRIVATE   // NOT IMPLEMENTED
+	PROTECTED // NOT IMPLEMENTED
 	STATIC
 	DEFAULT
 
@@ -131,7 +132,7 @@ const (
 	UDO
 	UNDERSCORE // _(PlaceHolder)
 
-	//Meta-Operators(for working with array)
+	// Meta-Operators(for working with array)
 	TILDEPLUS     // ~+
 	TILDEMINUS    // ~-
 	TILDEASTERISK // ~*
@@ -142,30 +143,30 @@ const (
 	USING
 	QUESTIONMM // ?? (Null Coalescing Operator)
 
-	//linq query
+	// linq query
 	FROM
-	//WHERE
+	// WHERE
 	SELECT
 	GROUP
 	INTO
 	ORDERBY
 	JOIN
-	//LET
-	//IN
+	// LET
+	// IN
 	ON
 	EQUALS
 	BY
 	ASCENDING
 	DESCENDING
 
-	//async & await
+	// async & await
 	ASYNC
 	AWAIT
 
-	//service
+	// service
 	SERVICE
 
-	//macors
+	// macors
 	DEFINE
 	IFDEF_MACRO
 	ELSE_MACRO
@@ -218,8 +219,9 @@ var keywords = map[string]TokenType{
 	"static":    STATIC,
 	"default":   DEFAULT,
 	"using":     USING,
+	"version":   VERSION,
 
-	//linq query
+	// linq query
 	"from": FROM,
 	//"where":      WHERE,
 	"select":  SELECT,
@@ -235,15 +237,15 @@ var keywords = map[string]TokenType{
 	"ascending":  ASCENDING,
 	"descending": DESCENDING,
 
-	//async & await
+	// async & await
 	"async": ASYNC,
 	"await": AWAIT,
 
-	//service
+	// service
 	"service": SERVICE,
 }
 
-//for debug & testing
+// for debug & testing
 func (tt TokenType) String() string {
 	switch tt {
 	case EOF:
@@ -480,11 +482,13 @@ func (tt TokenType) String() string {
 		return "~^"
 	case USING:
 		return "USING"
+	case VERSION:
+		return "VERSION"
 
-	//linq query
+	// linq query
 	case FROM:
 		return "FROM"
-	//case WHERE:
+	// case WHERE:
 	//	return "WHERE"
 	case SELECT:
 		return "SELECT"
@@ -496,9 +500,9 @@ func (tt TokenType) String() string {
 		return "ORDERBY"
 	case JOIN:
 		return "JOIN"
-	//case LET:
+	// case LET:
 	//	return "LET"
-	//case IN:
+	// case IN:
 	//	return "IN"
 	case ON:
 		return "ON"
@@ -511,7 +515,7 @@ func (tt TokenType) String() string {
 	case DESCENDING:
 		return "DESCENDING"
 
-	//async & await
+	// async & await
 	case ASYNC:
 		return "ASYNC"
 	case AWAIT:
@@ -520,7 +524,7 @@ func (tt TokenType) String() string {
 	case SERVICE:
 		return "SERVICE"
 
-	//macors
+	// macors
 	case DEFINE:
 		return "#define"
 	case IFDEF_MACRO:
@@ -539,7 +543,7 @@ type Token struct {
 	Literal string
 }
 
-//Stringer method for Token
+// Stringer method for Token
 func (t Token) String() string {
 	return fmt.Sprintf("Pos: %s, Type: %s, Literal: %s", t.Pos, t.Type, t.Literal)
 }
