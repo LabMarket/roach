@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"math/rand"
 	"os"
@@ -25,7 +25,7 @@ func runProgram(debug bool, filename string) {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	f, err := ioutil.ReadFile(wd + "/" + filename)
+	f, err := os.ReadFile(wd + "/" + filename)
 	if err != nil {
 		fmt.Println("roach: ", err.Error())
 		os.Exit(1)
@@ -193,13 +193,13 @@ func RegisterGoGlobals() {
 	})
 
 	eval.RegisterFunctions("io/ioutil", map[string]interface{}{
-		"WriteFile": ioutil.WriteFile,
-		"ReadFile":  ioutil.ReadFile,
-		"TempDir":   ioutil.TempDir,
-		"TempFile":  ioutil.TempFile,
-		"ReadAll":   ioutil.ReadAll,
-		"ReadDir":   ioutil.ReadDir,
-		"NopCloser": ioutil.NopCloser,
+		"WriteFile": os.WriteFile,
+		"ReadFile":  os.ReadFile,
+		"TempDir":   os.TempDir,
+		"TempFile":  os.CreateTemp,
+		"ReadAll":   io.ReadAll,
+		"ReadDir":   os.ReadDir,
+		"NopCloser": io.NopCloser,
 	})
 
 	eval.RegisterFunctions("bufio", map[string]interface{}{
@@ -225,7 +225,7 @@ func main() {
 	// We must reset `os.Args`, or the `flag` module will not functioning correctly
 	os.Args = os.Args[1:]
 	if len(args) == 0 {
-		fmt.Println("Roach programming language REPL\n")
+		fmt.Println("Roach programming language REPL")
 		repl.Start(os.Stdout, true)
 	} else {
 		if len(args) == 2 {
