@@ -1,0 +1,17 @@
+{
+    "go.lintTool": "golangci-lint", // Or "staticcheck", etc.
+    "go.lintFlags": [
+        "--fast" // Add any flags you want to pass to the linter
+    ],
+    "go.formatTool": "goimports",
+    "go.useLanguageServer": true,
+    "gopls": {
+        "formatting.gofumpt": true,
+    },
+    "[go]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    }
+}
