@@ -25,12 +25,12 @@ var formatMap = map[int]string{
 }
 
 var colorMap = map[string]string{
-	"STRING": "31", //red
-	"NUMBER": "32", //green
-	"ARRAY":  "33", //yellow
-	"HASH":   "34", //blue
-	"TUPLE":  "35", //purple(magenta)
-	"BOOL":   "36", //cyan
+	"STRING": "31", // red
+	"NUMBER": "32", // green
+	"ARRAY":  "33", // yellow
+	"HASH":   "34", // blue
+	"TUPLE":  "35", // purple(magenta)
+	"BOOL":   "36", // cyan
 }
 
 type ObjectType string
@@ -231,7 +231,7 @@ type Function struct {
 	Literal     *ast.FunctionLiteral
 	Variadic    bool
 	Scope       *Scope
-	Instance    *ObjectInstance //For use with class functions
+	Instance    *ObjectInstance // For use with class functions
 	Annotations []*ObjectInstance
 
 	Async bool
@@ -254,7 +254,7 @@ type ReturnValue struct {
 }
 
 func (rv *ReturnValue) Inspect() string {
-	//return rv.Value.Inspect()
+	// return rv.Value.Inspect()
 
 	var out bytes.Buffer
 	values := []string{}
@@ -289,8 +289,8 @@ func NewNil(s string) *Nil {
 }
 
 type Nil struct {
-	//sometimes when a function fails, it will return NIL. If this happens, we also need to
-	//know the error reason. The error message is stored in `OptionalMsg`
+	// sometimes when a function fails, it will return NIL. If this happens, we also need to
+	// know the error reason. The error message is stored in `OptionalMsg`
 	OptionalMsg string
 }
 
@@ -346,7 +346,6 @@ func (i *Integer) Inspect() string {
 func (i *Integer) Type() ObjectType { return INTEGER_OBJ }
 func (i *Integer) number()          {}
 func (i *Integer) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
-
 	switch method {
 	case "valid", "isValid":
 		return i.IsValid(line, args...)
@@ -581,7 +580,6 @@ func (i *UInteger) Inspect() string {
 func (i *UInteger) Type() ObjectType { return UINTEGER_OBJ }
 func (i *UInteger) number()          {}
 func (i *UInteger) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
-
 	switch method {
 	case "valid", "isValid":
 		return i.IsValid(line, args...)
@@ -818,7 +816,6 @@ func (f *Float) Inspect() string {
 func (f *Float) Type() ObjectType { return FLOAT_OBJ }
 func (f *Float) number()          {}
 func (f *Float) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
-
 	switch method {
 	case "valid", "isValid":
 		return f.IsValid(line, args...)
@@ -960,8 +957,8 @@ func (f *Float) Round(line string, args ...Object) Object {
 	}
 
 	format := fmt.Sprintf("%%.%df", precision)    //'%.xf', x is the precision, e.g. %.2f
-	resultStr := fmt.Sprintf(format, f.Float64)   //convert to string
-	ret, err := strconv.ParseFloat(resultStr, 64) //convert string back to float
+	resultStr := fmt.Sprintf(format, f.Float64)   // convert to string
+	ret, err := strconv.ParseFloat(resultStr, 64) // convert string back to float
 	if err != nil {
 		return NewFloat(math.NaN())
 	}
@@ -1031,8 +1028,8 @@ func NewBooleanObj(b bool) *Boolean {
 type Boolean struct {
 	Bool  bool
 	Valid bool
-	//sometimes when a function fails, it will return `false`. If this happens, we also need to
-	//know the error reason. The error message is stored in `OptionalMsg`
+	// sometimes when a function fails, it will return `false`. If this happens, we also need to
+	// know the error reason. The error message is stored in `OptionalMsg`
 	OptionalMsg string
 }
 
@@ -1064,7 +1061,6 @@ func (b Boolean) Value() (driver.Value, error) {
 
 func (b *Boolean) Type() ObjectType { return BOOLEAN_OBJ }
 func (b *Boolean) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
-
 	switch method {
 	case "valid", "isValid":
 		return b.IsValid(line, args...)
@@ -1193,7 +1189,7 @@ func (c *Continue) CallMethod(line string, scope *Scope, method string, args ...
 }
 
 func initGlobalObj() {
-	//Predefine `stdin`, `stdout`, `stderr`
+	// Predefine `stdin`, `stdout`, `stderr`
 	SetGlobalObj("stdin", &FileObject{File: os.Stdin})
 	SetGlobalObj("stdout", &FileObject{File: os.Stdout})
 	SetGlobalObj("stderr", &FileObject{File: os.Stderr})
@@ -1204,9 +1200,9 @@ func initGlobalObj() {
 		SetGlobalObj("endl", NewString("\r\n"))
 	}
 
-	//runtime
-	SetGlobalObj("RUNTIME_ARCH", NewString(runtime.GOARCH)) //running program's architecture target: one of 386, amd64, arm, s390x, and so on
-	SetGlobalObj("RUNTIME_OS", NewString(runtime.GOOS))     //running program's operating system target: one of darwin, freebsd, linux, and so on.
+	// runtime
+	SetGlobalObj("RUNTIME_ARCH", NewString(runtime.GOARCH)) // running program's architecture target: one of 386, amd64, arm, s390x, and so on
+	SetGlobalObj("RUNTIME_OS", NewString(runtime.GOOS))     // running program's operating system target: one of darwin, freebsd, linux, and so on.
 }
 
 func init() {
@@ -1232,6 +1228,7 @@ func init() {
 	NewDecimalObj()
 	NewUnicodeObj()
 	NewOptionalObj()
+	NewLangObj()
 }
 
 func marshalJsonObject(obj interface{}) (bytes.Buffer, error) {
@@ -1349,7 +1346,7 @@ func unmarshalHash(m map[string]interface{}) (Object, error) {
 		}
 
 		hash.Push("", keyObj, valObj)
-		//hash.Pairs[hashable.HashKey()] = HashPair{Key: keyObj, Value: valObj}
+		// hash.Pairs[hashable.HashKey()] = HashPair{Key: keyObj, Value: valObj}
 	}
 	return hash, nil
 }
@@ -1426,7 +1423,7 @@ func (ft *Formatter) Format(s fmt.State, verb rune) {
 	if verb > utf8.RuneSelf {
 		format = append(format, string(verb)...)
 	} else {
-		//Here we use '%_' to print the object's type
+		// Here we use '%_' to print the object's type
 		if verb == '_' {
 			format = append(format, byte('T'))
 		} else {
@@ -1437,12 +1434,12 @@ func (ft *Formatter) Format(s fmt.State, verb rune) {
 	formatStr := string(format)
 	if formatStr == "%T" {
 		t := reflect.TypeOf(ft.Obj)
-		strArr := strings.Split(t.String(), ".") //t.String() = "*eval.xxx"
-		fmt.Fprintf(s, "%s", strArr[1])          //NEED CHECK for "index out of bounds?"
+		strArr := strings.Split(t.String(), ".") // t.String() = "*eval.xxx"
+		fmt.Fprintf(s, "%s", strArr[1])          // NEED CHECK for "index out of bounds?"
 		return
 	}
 
-	var reset = "\033[0m"
+	reset := "\033[0m"
 
 	//	//if the float is actual an integer, and you use '%d'
 	//	//e.g.
