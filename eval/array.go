@@ -471,33 +471,6 @@ func (a *Array) Sum(line string, args ...Object) Object {
 	}
 
 	return NewFloat(sum)
-
-	//	var r float64 = 0
-	//
-	//	switch a.Members[0].(type) {
-	//	case *Integer:
-	//		var sum int64 = 0
-	//
-	//		for _, item := range a.Members {
-	//			sum += item.(*Integer).Int64
-	//		}
-	//
-	//		r = float64(sum)
-	//	case *UInteger:
-	//		var sum uint64 = 0
-	//
-	//		for _, item := range a.Members {
-	//			sum += item.(*UInteger).UInt64
-	//		}
-	//
-	//		r = float64(sum)
-	//	case *Float:
-	//		for _, item := range a.Members {
-	//			r += item.(*Float).Float64
-	//		}
-	//	}
-	//
-	//	return NewFloat(r)
 }
 
 // Min returns the minimum value in a collection of values.
