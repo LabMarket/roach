@@ -77,7 +77,6 @@ type BlockStatement struct {
 
 func (bs *BlockStatement) Pos() token.Position {
 	return bs.Token.Pos
-
 }
 
 //func (bs *BlockStatement) End() token.Position {
@@ -120,7 +119,7 @@ type ForLoop struct {
 	Init   Expression
 	Cond   Expression
 	Update Expression
-	Block  Node //BlockStatement or single expression
+	Block  Node // BlockStatement or single expression
 }
 
 func (fl *ForLoop) Pos() token.Position {
@@ -155,9 +154,9 @@ func (fl *ForLoop) String() string {
 type ForEachArrayLoop struct {
 	Token token.Token
 	Var   string
-	Value Expression //value to range over
-	Cond  Expression //conditional clause(nil if there is no 'WHERE' clause)
-	Block Node       //BlockStatement or single expression
+	Value Expression // value to range over
+	Cond  Expression // conditional clause(nil if there is no 'WHERE' clause)
+	Block Node       // BlockStatement or single expression
 }
 
 func (fal *ForEachArrayLoop) Pos() token.Position {
@@ -193,9 +192,9 @@ type ForEachMapLoop struct {
 	Token token.Token
 	Key   string
 	Value string
-	X     Expression //value to range over
-	Cond  Expression //Conditional clause(nil if there is no 'WHERE' clause)
-	Block Node       //BlockStatement or single expression
+	X     Expression // value to range over
+	Cond  Expression // Conditional clause(nil if there is no 'WHERE' clause)
+	Block Node       // BlockStatement or single expression
 }
 
 func (fml *ForEachMapLoop) Pos() token.Position {
@@ -260,8 +259,8 @@ type ForEachDotRange struct {
 	Var      string
 	StartIdx Expression
 	EndIdx   Expression
-	Cond     Expression //conditional clause(nil if there is no 'WHERE' clause)
-	Block    Node       //BlockStatement or single expression
+	Cond     Expression // conditional clause(nil if there is no 'WHERE' clause)
+	Block    Node       // BlockStatement or single expression
 }
 
 func (fdr *ForEachDotRange) Pos() token.Position {
@@ -303,7 +302,7 @@ func (fdr *ForEachDotRange) String() string {
 type WhileLoop struct {
 	Token     token.Token
 	Condition Expression
-	Block     Node //BlockStatement or single expression
+	Block     Node // BlockStatement or single expression
 }
 
 func (wl *WhileLoop) Pos() token.Position {
@@ -425,8 +424,8 @@ func (ifex *IfMacroStatement) String() string {
 
 type IfExpression struct {
 	Token       token.Token
-	Conditions  []*IfConditionExpr //if or elif part
-	Alternative Node               //else part(BlockStatement or single ExpressionStatement)
+	Conditions  []*IfConditionExpr // if or elif part
+	Alternative Node               // else part(BlockStatement or single ExpressionStatement)
 }
 
 func (ifex *IfExpression) Pos() token.Position {
@@ -470,8 +469,8 @@ func (ifex *IfExpression) String() string {
 // if/else-if condition
 type IfConditionExpr struct {
 	Token token.Token
-	Cond  Expression //condition
-	Body  Node       //body(BlockStatement or single ExpressionStatement)
+	Cond  Expression // condition
+	Body  Node       // body(BlockStatement or single ExpressionStatement)
 }
 
 func (ic *IfConditionExpr) Pos() token.Position {
@@ -549,7 +548,7 @@ func (ul *UnlessExpression) String() string {
 // /////////////////////////////////////////////////////////
 type HashLiteral struct {
 	Token       token.Token
-	Order       []Expression //For keeping the order of the hash key
+	Order       []Expression // For keeping the order of the hash key
 	Pairs       map[Expression]Expression
 	RBraceToken token.Token
 }
@@ -653,7 +652,7 @@ func (il *IntegerLiteral) String() string       { return il.Token.Literal }
 //	UNSIGNED INTEGER LITERAL                //
 //
 // /////////////////////////////////////////////////////////
-type UIntegerLiteral struct { //U: Unsigned
+type UIntegerLiteral struct { // U: Unsigned
 	Token token.Token
 	Value uint64
 }
@@ -742,8 +741,6 @@ func (rel *RegExLiteral) End() token.Position {
 	length := utf8.RuneCountInString(rel.Token.Literal)
 	pos := rel.Token.Pos
 	return token.Position{Filename: pos.Filename, Line: pos.Line, Col: pos.Col + length}
-
-	return rel.Token.Pos
 }
 
 func (rel *RegExLiteral) expressionNode()      {}
@@ -840,15 +837,15 @@ type FunctionLiteral struct {
 	Parameters []Expression
 	Body       *BlockStatement
 
-	//Default values
+	// Default values
 	Values map[string]Expression
 
 	Variadic bool
 
 	StaticFlag    bool
-	ModifierLevel ModifierLevel //for 'class' use
+	ModifierLevel ModifierLevel // for 'class' use
 
-	//If the function is async or not
+	// If the function is async or not
 	Async bool
 }
 
@@ -912,10 +909,10 @@ type FunctionStatement struct {
 	Name            *Identifier
 	FunctionLiteral *FunctionLiteral
 	Annotations     []*AnnotationStmt
-	IsServiceAnno   bool //service annotation(@route) is processed differently
-	//Doc related
+	IsServiceAnno   bool // service annotation(@route) is processed differently
+	// Doc related
 	Doc         *CommentGroup // associated documentation; or nil
-	SrcEndToken token.Token   //used for printing source code
+	SrcEndToken token.Token   // used for printing source code
 }
 
 func (f *FunctionStatement) Pos() token.Position {
@@ -943,7 +940,7 @@ func (f *FunctionStatement) TokenLiteral() string { return f.Token.Literal }
 func (f *FunctionStatement) String() string {
 	var out bytes.Buffer
 
-	for _, anno := range f.Annotations { //for each annotation
+	for _, anno := range f.Annotations { // for each annotation
 		out.WriteString(anno.String())
 	}
 
@@ -1218,7 +1215,7 @@ func (ds *DeferStmt) String() string {
 // /////////////////////////////////////////////////////////
 type ReturnStatement struct {
 	Token        token.Token
-	ReturnValue  Expression //for old campatibility
+	ReturnValue  Expression // for old campatibility
 	ReturnValues []Expression
 }
 
@@ -1301,19 +1298,19 @@ type LetStatement struct {
 	Values []Expression
 
 	StaticFlag    bool
-	ModifierLevel ModifierLevel //used in 'class'
+	ModifierLevel ModifierLevel // used in 'class'
 	Annotations   []*AnnotationStmt
 
-	//Doc related
+	// Doc related
 	Doc         *CommentGroup // associated documentation; or nil
 	SrcEndToken token.Token
 
-	//destructuring assigment flag
+	// destructuring assigment flag
 	DestructingFlag bool
 
-	//For debugger use, If the LetStatement is in a class declaration,
-	//we do not want the debugger to stop at it.
-	InClass bool //true if the LetStatement is in a Class declaration
+	// For debugger use, If the LetStatement is in a class declaration,
+	// we do not want the debugger to stop at it.
+	InClass bool // true if the LetStatement is in a Class declaration
 }
 
 func (ls *LetStatement) Pos() token.Position {
@@ -1367,7 +1364,7 @@ func (ls *LetStatement) String() string {
 		out.WriteString(")")
 	}
 
-	if len(ls.Values) == 0 { //e.g. 'let x'
+	if len(ls.Values) == 0 { // e.g. 'let x'
 		out.WriteString(";")
 		return out.String()
 	}
@@ -1398,10 +1395,10 @@ type ConstStatement struct {
 	Value []Expression
 
 	StaticFlag    bool
-	ModifierLevel ModifierLevel //used in 'class'
+	ModifierLevel ModifierLevel // used in 'class'
 	Annotations   []*AnnotationStmt
 
-	//Doc related
+	// Doc related
 	Doc         *CommentGroup // associated documentation; or nil
 	SrcEndToken token.Token
 }
@@ -1474,7 +1471,7 @@ type ImportStatement struct {
 	Token      token.Token
 	ImportPath string
 	Program    *Program
-	Functions  map[string]*FunctionLiteral //for debugger usage
+	Functions  map[string]*FunctionLiteral // for debugger usage
 }
 
 func (is *ImportStatement) Pos() token.Position {
@@ -1558,7 +1555,7 @@ type AssignExpression struct {
 }
 
 func (ae *AssignExpression) Pos() token.Position {
-	//return ae.Token.Pos
+	// return ae.Token.Pos
 	return ae.Name.Pos()
 }
 
@@ -1573,7 +1570,7 @@ func (ae *AssignExpression) String() string {
 	var out bytes.Buffer
 
 	out.WriteString(ae.Name.String())
-	//out.WriteString(" = ")
+	// out.WriteString(" = ")
 	out.WriteString(ae.Token.Literal)
 	out.WriteString(ae.Value.String())
 
@@ -1587,10 +1584,10 @@ func (ae *AssignExpression) String() string {
 // /////////////////////////////////////////////////////////
 type GrepExpr struct {
 	Token token.Token
-	Var   string          //Name is "$_"
-	Value Expression      //value to range over
-	Block *BlockStatement //Grep Block, may be nil
-	Expr  Expression      //Grep Expr, may be nil
+	Var   string          // Name is "$_"
+	Value Expression      // value to range over
+	Block *BlockStatement // Grep Block, may be nil
+	Expr  Expression      // Grep Expr, may be nil
 }
 
 func (ge *GrepExpr) Pos() token.Position {
@@ -1604,7 +1601,7 @@ func (ge *GrepExpr) End() token.Position {
 	if ge.Expr == nil {
 		return ge.Block.End()
 	}
-	return ge.Token.Pos //should never happen
+	return ge.Token.Pos // should never happen
 }
 
 func (ge *GrepExpr) expressionNode()      {}
@@ -1635,10 +1632,10 @@ func (ge *GrepExpr) String() string {
 // /////////////////////////////////////////////////////////
 type MapExpr struct {
 	Token token.Token
-	Var   string          //Name is "$_"
-	Value Expression      //value to range over
-	Block *BlockStatement //Grep Block, may be nil
-	Expr  Expression      //Grep Expr, may be nil
+	Var   string          // Name is "$_"
+	Value Expression      // value to range over
+	Block *BlockStatement // Grep Block, may be nil
+	Expr  Expression      // Grep Expr, may be nil
 }
 
 func (me *MapExpr) Pos() token.Position {
@@ -1652,7 +1649,7 @@ func (me *MapExpr) End() token.Position {
 	if me.Expr == nil {
 		return me.Block.End()
 	}
-	return me.Token.Pos //should never happen
+	return me.Token.Pos // should never happen
 }
 
 func (me *MapExpr) expressionNode()      {}
@@ -1673,7 +1670,6 @@ func (me *MapExpr) String() string {
 
 	out.WriteString(me.Value.String())
 	return out.String()
-
 }
 
 // /////////////////////////////////////////////////////////
@@ -2210,7 +2206,7 @@ type EnumStatement struct {
 	Name        *Identifier
 	EnumLiteral *EnumLiteral
 
-	//Doc related
+	// Doc related
 	Doc         *CommentGroup // associated documentation; or nil
 	SrcEndToken token.Token
 }
@@ -2255,9 +2251,9 @@ func (e *EnumStatement) Docs() string {
 type ListComprehension struct {
 	Token token.Token
 	Var   string
-	Value Expression //value(array or string) to range over
-	Cond  Expression //conditional clause(nil if there is no 'WHERE' clause)
-	Expr  Expression //the result expression
+	Value Expression // value(array or string) to range over
+	Cond  Expression // conditional clause(nil if there is no 'WHERE' clause)
+	Expr  Expression // the result expression
 }
 
 func (lc *ListComprehension) Pos() token.Position {
@@ -2303,8 +2299,8 @@ type ListRangeComprehension struct {
 	Var      string
 	StartIdx Expression
 	EndIdx   Expression
-	Cond     Expression //conditional clause(nil if there is no 'WHERE' clause)
-	Expr     Expression //the result expression
+	Cond     Expression // conditional clause(nil if there is no 'WHERE' clause)
+	Expr     Expression // the result expression
 }
 
 func (lc *ListRangeComprehension) Pos() token.Position {
@@ -2351,9 +2347,9 @@ type ListMapComprehension struct {
 	Token token.Token
 	Key   string
 	Value string
-	X     Expression //value(hash) to range over
-	Cond  Expression //Conditional clause(nil if there is no 'WHERE' clause)
-	Expr  Expression //the result expression
+	X     Expression // value(hash) to range over
+	Cond  Expression // Conditional clause(nil if there is no 'WHERE' clause)
+	Expr  Expression // the result expression
 }
 
 func (mc *ListMapComprehension) Pos() token.Position {
@@ -2397,10 +2393,10 @@ func (mc *ListMapComprehension) String() string {
 type HashComprehension struct {
 	Token   token.Token
 	Var     string
-	Value   Expression //value(array or string) to range over
-	Cond    Expression //conditional clause(nil if there is no 'WHERE' clause)
-	KeyExpr Expression //the result Key expression
-	ValExpr Expression //the result Value expression
+	Value   Expression // value(array or string) to range over
+	Cond    Expression // conditional clause(nil if there is no 'WHERE' clause)
+	KeyExpr Expression // the result Key expression
+	ValExpr Expression // the result Value expression
 }
 
 func (hc *HashComprehension) Pos() token.Position {
@@ -2448,9 +2444,9 @@ type HashRangeComprehension struct {
 	Var      string
 	StartIdx Expression
 	EndIdx   Expression
-	Cond     Expression //conditional clause(nil if there is no 'WHERE' clause)
-	KeyExpr  Expression //the result Key expression
-	ValExpr  Expression //the result Value expression
+	Cond     Expression // conditional clause(nil if there is no 'WHERE' clause)
+	KeyExpr  Expression // the result Key expression
+	ValExpr  Expression // the result Value expression
 }
 
 func (hc *HashRangeComprehension) Pos() token.Position {
@@ -2499,10 +2495,10 @@ type HashMapComprehension struct {
 	Token   token.Token
 	Key     string
 	Value   string
-	X       Expression //value(hash) to range over
-	Cond    Expression //Conditional clause(nil if there is no 'WHERE' clause)
-	KeyExpr Expression //the result Key expression
-	ValExpr Expression //the result Value expression
+	X       Expression // value(hash) to range over
+	Cond    Expression // Conditional clause(nil if there is no 'WHERE' clause)
+	KeyExpr Expression // the result Key expression
+	ValExpr Expression // the result Value expression
 }
 
 func (mc *HashMapComprehension) Pos() token.Position {
@@ -2618,11 +2614,11 @@ type ClassLiteral struct {
 	Token      token.Token
 	Name       string
 	Parent     string
-	Members    []*LetStatement               //class's fields
-	Properties map[string]*PropertyDeclStmt  //class's properties
-	Methods    map[string]*FunctionStatement //class's methods
-	Block      *BlockStatement               //mainly used for debugging purpose
-	Modifier   ModifierLevel                 //NOT IMPLEMENTED
+	Members    []*LetStatement               // class's fields
+	Properties map[string]*PropertyDeclStmt  // class's properties
+	Methods    map[string]*FunctionStatement // class's methods
+	Block      *BlockStatement               // mainly used for debugging purpose
+	Modifier   ModifierLevel                 // NOT IMPLEMENTED
 }
 
 func (c *ClassLiteral) Pos() token.Position {
@@ -2661,12 +2657,12 @@ func (c *ClassLiteral) String() string {
 // /////////////////////////////////////////////////////////
 type ClassStatement struct {
 	Token        token.Token
-	Name         *Identifier //Class name
+	Name         *Identifier // Class name
 	CategoryName *Identifier
 	ClassLiteral *ClassLiteral
-	IsAnnotation bool //class is a annotation class
+	IsAnnotation bool // class is a annotation class
 
-	//Doc related
+	// Doc related
 	Doc         *CommentGroup // associated documentation; or nil
 	SrcEndToken token.Token
 }
@@ -2786,16 +2782,16 @@ func (n *NewExpression) String() string {
 // class's property declaration
 type PropertyDeclStmt struct {
 	Token         token.Token
-	Name          *Identifier   //property name
-	Getter        *GetterStmt   //getter
-	Setter        *SetterStmt   //setter
-	Indexes       []*Identifier //only used in class's indexer
+	Name          *Identifier   // property name
+	Getter        *GetterStmt   // getter
+	Setter        *SetterStmt   // setter
+	Indexes       []*Identifier // only used in class's indexer
 	StaticFlag    bool
-	ModifierLevel ModifierLevel //property's modifier
+	ModifierLevel ModifierLevel // property's modifier
 	Annotations   []*AnnotationStmt
 	Default       Expression
 
-	//Doc related
+	// Doc related
 	Doc         *CommentGroup // associated documentation; or nil
 	SrcEndToken token.Token
 }
@@ -2853,7 +2849,7 @@ func (p *PropertyDeclStmt) String() string {
 	} else {
 	}
 
-	if p.Default != nil { //must be an annotation class
+	if p.Default != nil { // must be an annotation class
 		out.WriteString(" default ")
 		out.WriteString(p.Default.String())
 		return out.String()
@@ -2900,7 +2896,7 @@ func (p *PropertyDeclStmt) Docs() string {
 	} else {
 	}
 
-	if p.Default != nil { //must be an annotation class
+	if p.Default != nil { // must be an annotation class
 		out.WriteString(" default ")
 		out.WriteString(p.Default.String())
 		return out.String()
@@ -2992,7 +2988,7 @@ func (s *SetterStmt) String() string {
 // /////////////////////////////////////////////////////////
 type ClassIndexerExpression struct {
 	Token      token.Token
-	Parameters []Expression //indexer's parameters
+	Parameters []Expression // indexer's parameters
 }
 
 func (ci *ClassIndexerExpression) Pos() token.Position {
@@ -3139,8 +3135,8 @@ query_continuation : INTO identifier query_body
 // query_expression : from_clause query_body
 type QueryExpr struct {
 	Token     token.Token //'from'
-	From      Expression  //FromExpr
-	QueryBody Expression  //QueryBodyExpr
+	From      Expression  // FromExpr
+	QueryBody Expression  // QueryBodyExpr
 }
 
 func (q *QueryExpr) Pos() token.Position {
@@ -3166,8 +3162,8 @@ func (q *QueryExpr) String() string {
 
 // from_clause : FROM identifier IN expression
 type FromExpr struct {
-	Token token.Token //from
-	Var   string      //identifier
+	Token token.Token // from
+	Var   string      // identifier
 	Expr  Expression
 }
 
@@ -3194,9 +3190,9 @@ func (f *FromExpr) String() string {
 
 // query_body : query_body_clause* select_or_group_clause query_continuation?
 type QueryBodyExpr struct {
-	QueryBody         []Expression //QueryBodyClauseExpr
-	Expr              Expression   //SelectExpr or GroupExpr
-	QueryContinuation Expression   //QueryContinuationExpr
+	QueryBody         []Expression // QueryBodyClauseExpr
+	Expr              Expression   // SelectExpr or GroupExpr
+	QueryContinuation Expression   // QueryContinuationExpr
 }
 
 func (q *QueryBodyExpr) Pos() token.Position {
@@ -3283,11 +3279,11 @@ func (w *WhereExpr) String() string {
 // combined_join_clause : JOIN identifier IN expression ON expression EQUALS expression (INTO identifier)?
 type JoinExpr struct {
 	Token     token.Token //'join'
-	JoinVar   string      //identifier
+	JoinVar   string      // identifier
 	InExpr    Expression
 	OnExpr    Expression
 	EqualExpr Expression
-	IntoVar   *Identifier //why IntoVar's type is '*Identifier', not 'string'? because we need it in 'End()' function.
+	IntoVar   *Identifier // why IntoVar's type is '*Identifier', not 'string'? because we need it in 'End()' function.
 }
 
 func (j *JoinExpr) Pos() token.Position {
@@ -3444,7 +3440,7 @@ func (g *GroupExpr) String() string {
 type QueryContinuationExpr struct {
 	Token token.Token // 'into'
 	Var   string
-	Expr  Expression //QueryBodyExpr
+	Expr  Expression // QueryBodyExpr
 }
 
 func (q *QueryContinuationExpr) Pos() token.Position {
@@ -3507,13 +3503,13 @@ func (aw *AwaitExpr) String() string {
 // /////////////////////////////////////////////////////////
 type ServiceStatement struct {
 	Token   token.Token
-	Name    *Identifier //Service name
+	Name    *Identifier // Service name
 	Addr    string
 	Debug   bool
-	Methods map[string]*FunctionStatement //service's methods
-	Block   *BlockStatement               //mainly used for debugging purpose
+	Methods map[string]*FunctionStatement // service's methods
+	Block   *BlockStatement               // mainly used for debugging purpose
 
-	//Doc related
+	// Doc related
 	Doc         *CommentGroup // associated documentation; or nil
 	SrcEndToken token.Token
 }
@@ -3712,7 +3708,7 @@ func (g *CommentGroup) Text() string {
 					tmpline = tmpline[1:]
 				}
 				if len(tmpline) > 0 && tmpline[0] == ' ' {
-					//strip first space
+					// strip first space
 					tmpline = tmpline[1:]
 				}
 			}
