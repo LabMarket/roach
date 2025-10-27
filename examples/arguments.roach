@@ -4,7 +4,7 @@
 // This program dumps the command-line arguments the script received.
 //
 
-println( "Roach version:", lang.Version(), ".", lang.BuildNumber() )
+println( "Roach version:", lang.Version, ".", lang.BuildNumber )
 
 let a = lang.Arguments()
 
