@@ -25,7 +25,8 @@ for file in files {
 	if file.Name() == ".git" {
 		continue
 	}
-	gfmt.Printf("Name=%s, Size=%d\n", file.Name(), file.Size())
+	info, err = file.Info()
+	gfmt.Printf("Name=%s, Size=%d\n", info.Name(), info.Size())
 }
 
 for s in gregex.MustCompile(``[\s_]``).Split("foo_bar_baz", -1) {
