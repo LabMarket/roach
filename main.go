@@ -25,7 +25,7 @@ func runProgram(debug bool, filename string) {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	f, err := os.ReadFile(wd + "/" + filename)
+	f, err := os.ReadFile(filename)
 	if err != nil {
 		fmt.Println("roach: ", err.Error())
 		os.Exit(1)
@@ -188,7 +188,6 @@ func RegisterGoGlobals() {
 		"Intn":        rand.Intn,
 		"NormFloat64": rand.NormFloat64,
 		"Perm":        rand.Perm,
-		"Seed":        rand.Seed,
 		"Uint32":      rand.Uint32,
 	})
 
