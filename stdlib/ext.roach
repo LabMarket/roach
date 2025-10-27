@@ -1,0 +1,12 @@
+//
+// This file contains functions available by default, implemented in 100%
+// pure roach.
+//
+// i.e. This is part of our standard-library.
+//
+// If you wish to make changes to the standard-library functions in this
+// file you'll need to rebuild the interpreter after making your changes.
+//
+// This file it is embedded in the generated-binary as part of the build
+// process.
+//

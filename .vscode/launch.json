@@ -17,5 +17,13 @@
             "program": "${workspaceFolder}/main.go",
             "args": ["-v"],
         },
+        {
+            "name": "Roach REPL",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/main.go",
+            "console": "integratedTerminal",
+        },
     ]
 }

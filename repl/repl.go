@@ -51,8 +51,10 @@ var roachOperators = []string{
 // 	liner.IdentType:    liner.COLOR_WHITE,
 // }
 
-const PROMPT = "roach>> "
-const CONT_PROMPT = "... " // continue prompt
+const (
+	PROMPT      = "roach>> "
+	CONT_PROMPT = "... " // continue prompt
+)
 
 func Start(out io.Writer, color bool) {
 	history := filepath.Join(os.TempDir(), ".roach_history")
@@ -99,10 +101,10 @@ func Start(out io.Writer, color bool) {
 			}
 
 			tmpline := strings.TrimSpace(line)
-			if len(tmpline) == 0 || tmpline[0] == '#' { //empty line or single comment line
+			if len(tmpline) == 0 || tmpline[0] == '#' { // empty line or single comment line
 				continue
 			} else {
-				//check if the line is a valid expression or statement
+				// check if the line is a valid expression or statement
 				lex = lexer.New("", tmpline)
 				p = parser.New(lex, wd)
 				program = p.ParseProgram()
@@ -114,7 +116,7 @@ func Start(out io.Writer, color bool) {
 					if program == nil {
 						printParserErrors(out, p.Errors())
 						continue
-					} else if len(program.Statements) == 0 { //it's an 'import' statement
+					} else if len(program.Statements) == 0 { // it's an 'import' statement
 						var errFlag bool
 						for _, importItem := range program.Imports {
 							if importItem.Program == nil { // error
@@ -144,15 +146,16 @@ func Start(out io.Writer, color bool) {
 								l.AppendHistory(strings.Replace(text, "\n", "", -1))
 								break
 							} else {
+								printParserErrors(out, p.Errors())
 								continue
 							}
-						} else if err == liner.ErrPromptAborted { //CTRL-C pressed
+						} else if err == liner.ErrPromptAborted { // CTRL-C pressed
 							break
 						}
 					}
 				}
 			}
-		} else if err == liner.ErrPromptAborted { //CTRL-C pressed
+		} else if err == liner.ErrPromptAborted { // CTRL-C pressed
 			if f, err := os.Create(history); err == nil {
 				l.WriteHistory(f)
 				f.Close()

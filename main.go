@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"embed"
 	"fmt"
 	"io"
 	"log"
@@ -9,6 +10,7 @@ import (
 	"os"
 	"regexp"
 	"runtime"
+	"strings"
 	"time"
 
 	"roach/eval"
@@ -18,6 +20,32 @@ import (
 	"roach/repl"
 	"roach/version"
 )
+
+//go:embed stdlib
+var stdlib embed.FS
+
+// loadAndEvaluateStdlib reads and evaluates all embedded standard library files.
+func loadStdlib() error {
+	wd, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+	entries, err := stdlib.ReadDir(wd + "/stdlib")
+	if err != nil {
+		return fmt.Errorf("failed to read embedded stdlib directory: %w", err)
+	}
+
+	for _, entry := range entries {
+		if !strings.HasSuffix(entry.Name(), ".roach") {
+			continue
+		}
+
+		filePath := "stdlib/" + entry.Name()
+		runProgram(false, string(filePath))
+	}
+	return nil
+}
 
 func runProgram(debug bool, filename string) {
 	wd, err := os.Getwd()
@@ -68,12 +96,6 @@ func runProgram(debug bool, filename string) {
 	if result.Type() == eval.ERROR_OBJ {
 		fmt.Println(result.Inspect())
 	}
-
-	// e := eval.Eval(program, scope)
-	//
-	//	if e.Inspect() != "nil" {
-	//		fmt.Println(e.Inspect())
-	//	}
 }
 
 // Register go package methods/types
@@ -220,6 +242,8 @@ func RegisterGoGlobals() {
 }
 
 func main() {
+	loadStdlib()
+
 	args := os.Args[1:]
 	// We must reset `os.Args`, or the `flag` module will not functioning correctly
 	os.Args = os.Args[1:]
@@ -230,17 +254,16 @@ func main() {
 		if len(args) == 2 {
 			if args[0] == "-d" || args[0] == "--debug" { // debug
 				runProgram(true, args[1])
-			} else {
-				fmt.Println("Usage: roach -d file.roach")
-				os.Exit(1)
+				os.Exit(0)
 			}
-		} else if args[0] == "-v" || args[0] == "--version" {
+		}
+		if args[0] == "-v" || args[0] == "--version" {
 			fmt.Println("Roach Language Interpreter")
 			fmt.Println("Version: ", version.Version)
 			fmt.Println("BuildNumber: ", version.BuildNumber)
-			os.Exit(0)
 		} else {
 			runProgram(false, args[0])
 		}
+		os.Exit(0)
 	}
 }
