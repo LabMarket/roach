@@ -71,14 +71,18 @@ func (i *IOUtilObj) ReadDir(line string, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "readDir", "*String", args[0].Type())
 	}
 
-	files, err := ioutil.ReadDir(dirname.String)
+	files, err := os.ReadDir(dirname.String)
 	if err != nil {
 		return NewNil(err.Error())
 	}
 
 	arr := &Array{}
 	for _, file := range files {
-		arr.Members = append(arr.Members, &FileInfoObj{Info: file})
+		info, err := file.Info()
+		if err != nil {
+			return NewNil(err.Error())
+		}
+		arr.Members = append(arr.Members, &FileInfoObj{Info: info})
 	}
 
 	return arr
@@ -184,7 +188,7 @@ type FileObject struct {
 	writer  *bufio.Writer
 }
 
-//Implement the 'Closeable' interface
+// Implement the 'Closeable' interface
 func (f *FileObject) close(line string, args ...Object) Object {
 	return f.Close(line, args...)
 }
@@ -238,10 +242,10 @@ func (f *FileObject) Close(line string, args ...Object) Object {
 	return TRUE
 }
 
-//Note: This method will return three different values:
-//   1. nil    - with error message    (ERROR)
-//   2. nil    - without error message (EOF)
-//   3. string - read string
+// Note: This method will return three different values:
+//  1. nil    - with error message    (ERROR)
+//  2. nil    - without error message (EOF)
+//  3. string - read string
 func (f *FileObject) Read(line string, args ...Object) Object {
 	if len(args) != 1 {
 		return NewError(line, ARGUMENTERROR, "1", len(args))
@@ -363,7 +367,7 @@ func (f *FileObject) Stat(line string, args ...Object) Object {
 		return NewNil(err.Error())
 	}
 
-	//return FileInfo2HashObj(fileInfo)
+	// return FileInfo2HashObj(fileInfo)
 	return &FileInfoObj{Info: fileInfo}
 }
 

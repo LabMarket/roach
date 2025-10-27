@@ -676,7 +676,7 @@ func (m *Math) RandSeed(line string, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "randseed", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
-	rand.Seed(val.Int64)
+	rand.New(rand.NewSource(val.Int64))
 	return NIL
 }
 
@@ -722,7 +722,7 @@ func (m *Math) Rand(line string, args ...Object) Object {
 			return NewError(line, PARAMTYPEERROR, "second", "rand", "*Integer|*UInteger|*Float", args[1].Type())
 		}
 
-		rand.Seed(time.Now().UnixNano())
+		rand.New(rand.NewSource(time.Now().UnixNano()))
 		n := rand.Intn(int(high.Int64 - low.Int64))
 		return NewInteger(int64(n) + low.Int64)
 	}
