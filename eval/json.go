@@ -15,8 +15,7 @@ const (
 	json_name = "json"
 )
 
-type Json struct {
-}
+type Json struct{}
 
 func NewJsonObj() Object {
 	ret := &Json{}
@@ -141,7 +140,7 @@ func (j *Json) UnMarshal(line string, args ...Object) Object {
 			return NewNil(err.Error())
 		}
 		return h
-	} else { //simple types, e.g. number, string
+	} else { // simple types, e.g. number, string
 		var val interface{}
 		err := json.Unmarshal(b, &val)
 		if err != nil {
@@ -235,7 +234,7 @@ func (j *Json) WriteFile(line string, args ...Object) Object {
 		return v
 	}
 
-	err := ioutil.WriteFile(fileNameObj.String, []byte(v.(*String).String), os.FileMode(permObj.Int64))
+	err := os.WriteFile(fileNameObj.String, []byte(v.(*String).String), os.FileMode(permObj.Int64))
 	if err != nil {
 		return NewFalseObj(err.Error())
 	}
