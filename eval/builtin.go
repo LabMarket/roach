@@ -60,7 +60,7 @@ func absBuiltin() *Builtin {
 			default:
 				return NewError(line, PARAMTYPEERROR, "first", "abs", "*Integer|*UInteger", args[0].Type())
 			}
-		}, //Here the ',' is a must, it confused me a lot
+		}, // Here the ',' is a must, it confused me a lot
 	}
 }
 
@@ -171,7 +171,7 @@ func newFileBuiltin(funcName string) *Builtin {
 			var fname *String
 			var flag int = os.O_RDONLY
 			var ok bool
-			var perm os.FileMode = os.FileMode(0666)
+			var perm os.FileMode = os.FileMode(0o666)
 
 			argLen := len(args)
 			if argLen < 1 {
@@ -217,7 +217,7 @@ func intBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) == 0 {
-				//returns an empty int(defaults to 0)
+				// returns an empty int(defaults to 0)
 				return NewInteger(0)
 			}
 			if len(args) != 1 {
@@ -241,7 +241,7 @@ func intBuiltin() *Builtin {
 				var n int64
 				var err error
 
-				var content = input.String
+				content := input.String
 				if len(content) == 0 {
 					return NewInteger(0)
 				}
@@ -269,7 +269,7 @@ func uintBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) == 0 {
-				//returns an empty int(defaults to 0)
+				// returns an empty int(defaults to 0)
 				return NewInteger(0)
 			}
 			if len(args) != 1 {
@@ -293,7 +293,7 @@ func uintBuiltin() *Builtin {
 				var n uint64
 				var err error
 
-				var content = input.String
+				content := input.String
 				if len(content) == 0 {
 					return NewUInteger(0)
 				}
@@ -320,7 +320,7 @@ func floatBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) == 0 {
-				//returns an empty float(defaults to 0.0)
+				// returns an empty float(defaults to 0.0)
 				return NewFloat(0.0)
 			}
 			if len(args) != 1 {
@@ -381,7 +381,7 @@ func strBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) == 0 {
-				//returns an empty string
+				// returns an empty string
 				return NewString("")
 			}
 			if len(args) != 1 {
@@ -393,7 +393,7 @@ func strBuiltin() *Builtin {
 			default:
 				return NewString(input.Inspect())
 			}
-			//return NewError(line, INPUTERROR, args[0].Type(), "str")
+			// return NewError(line, INPUTERROR, args[0].Type(), "str")
 		},
 	}
 }
@@ -402,7 +402,7 @@ func arrayBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) == 0 {
-				//returns an empty array
+				// returns an empty array
 				return &Array{Members: []Object{}}
 			}
 
@@ -428,7 +428,7 @@ func tupleBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) == 0 {
-				//returns an empty tuple
+				// returns an empty tuple
 				return &Tuple{Members: []Object{}}
 			}
 
@@ -454,7 +454,7 @@ func hashBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) == 0 {
-				//returns an empty hash
+				// returns an empty hash
 				return NewHash()
 			}
 
@@ -466,8 +466,8 @@ func hashBuiltin() *Builtin {
 				return input
 			case *Tuple:
 				length := len(input.Members)
-				if length == 0 { //empty tuple
-					//return empty hash
+				if length == 0 { // empty tuple
+					// return empty hash
 					return NewHash()
 				}
 				newMembers := make([]Object, length)
@@ -482,7 +482,7 @@ func hashBuiltin() *Builtin {
 				for i := 0; i <= length/2; {
 					if _, ok := newMembers[i].(Hashable); ok {
 						hash.Push(line, newMembers[i], newMembers[i+1])
-						//hash.Pairs[hashable.HashKey()] = HashPair{Key: newMembers[i], Value: newMembers[i+1]}
+						// hash.Pairs[hashable.HashKey()] = HashPair{Key: newMembers[i], Value: newMembers[i+1]}
 						i = i + 2
 					} else {
 						return NewError(line, GENERICERROR, fmt.Sprintf("%d index is not hashable", i))
@@ -492,8 +492,8 @@ func hashBuiltin() *Builtin {
 				return hash
 			case *Array:
 				length := len(input.Members)
-				if length == 0 { //empty tuple
-					//return empty hash
+				if length == 0 { // empty tuple
+					// return empty hash
 					return NewHash()
 				}
 				newMembers := make([]Object, length)
@@ -508,7 +508,7 @@ func hashBuiltin() *Builtin {
 				for i := 0; i <= length/2; {
 					if _, ok := newMembers[i].(Hashable); ok {
 						hash.Push(line, newMembers[i], newMembers[i+1])
-						//hash.Pairs[hashable.HashKey()] = HashPair{Key: newMembers[i], Value: newMembers[i+1]}
+						// hash.Pairs[hashable.HashKey()] = HashPair{Key: newMembers[i], Value: newMembers[i+1]}
 						i = i + 2
 					} else {
 						return NewError(line, GENERICERROR, fmt.Sprintf("%d index is not hashable", i))
@@ -526,7 +526,7 @@ func decimalBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) == 0 {
-				//returns an empty decimal(defaults to 0)
+				// returns an empty decimal(defaults to 0)
 				return &DecimalObj{Number: NewDec(0, 0), Valid: true}
 			}
 			if len(args) != 1 {
@@ -653,9 +653,8 @@ func printBuiltin() *Builtin {
 
 			format, wrapped := correctPrintResult(false, args...)
 			n, err := fmt.Fprintf(scope.Writer, format, wrapped...)
-
-			//Note, here we do not use 'fmt.Print', why? please see correctPrintResult() comments.
-			//n, err := fmt.Print(s, wrapped...)
+			// Note, here we do not use 'fmt.Print', why? please see correctPrintResult() comments.
+			// n, err := fmt.Print(s, wrapped...)
 			if err != nil {
 				return NewNil(err.Error())
 			}
@@ -676,8 +675,8 @@ func printlnBuiltin() *Builtin {
 				return NewInteger(int64(n))
 			}
 
-			//Note, here we do not use 'fmt.Println', why? please see correctPrintResult() comments.
-			//n, err := fmt.Println(s, wrapped...)
+			// Note, here we do not use 'fmt.Println', why? please see correctPrintResult() comments.
+			// n, err := fmt.Println(s, wrapped...)
 
 			format, wrapped := correctPrintResult(true, args...)
 			n, err := fmt.Fprintf(scope.Writer, format, wrapped...)
@@ -715,7 +714,6 @@ func printfBuiltin() *Builtin {
 				}
 			}
 			n, err := fmt.Fprintf(scope.Writer, formatStr, wrapped...)
-
 			if err != nil {
 				return NewNil(err.Error())
 			}
@@ -797,11 +795,11 @@ func sscanfBuiltin() *Builtin {
 			}
 
 			_, err := fmt.Sscanf(strObj.String, formatStr, values...)
-			if err != nil { //error
+			if err != nil { // error
 				return NewNil(err.Error())
 			}
 
-			//convert go's interface{} back to roach's Object
+			// convert go's interface{} back to roach's Object
 			for i := range subArgs {
 				subArgs[i], _ = unmarshalJsonObject(values[i])
 			}
@@ -897,7 +895,7 @@ func reverseBuiltin() *Builtin {
 				for _, hk := range input.Order { //hk:hash key
 					v, _ := input.Pairs[hk]
 					hash.Push(line, v.Value, v.Key)
-					//hash.Pairs[hashable.HashKey()] = HashPair{Key: v.Value, Value: v.Key}
+					// hash.Pairs[hashable.HashKey()] = HashPair{Key: v.Value, Value: v.Key}
 				}
 				return hash
 			default:
@@ -931,10 +929,6 @@ func iffBuiltin() *Builtin {
 func newArrayBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, scope *Scope, args ...Object) Object {
-			if len(args) < 0 {
-				return NewError(line, ARGUMENTERROR, ">0", len(args))
-			}
-
 			var count int64
 			switch o := args[0].(type) {
 			case *Integer:
@@ -974,7 +968,7 @@ func newArrayBuiltin() *Builtin {
 				return ret
 			}
 
-			//count > newLen
+			// count > newLen
 			for i := newLen; i < count; i++ {
 				ret.Members = append(ret.Members, NIL)
 			}
@@ -1283,7 +1277,6 @@ func newDateBuiltin() *Builtin {
 					int(hour.Int64), int(min.Int64), int(sec.Int64), int(nsec.Int64),
 					loc), Valid: true}
 			}
-
 		},
 	}
 }
@@ -1544,45 +1537,45 @@ func init() {
 		"iff":      iffBuiltin(),
 		"newArray": newArrayBuiltin(),
 
-		//net
+		// net
 		"dialTCP":    dialTCPBuiltin(),
 		"listenTCP":  listenTCPBuiltin(),
 		"dialUDP":    dialUDPBuiltin(),
 		"dialUnix":   dialUnixBuiltin(),
 		"listenUnix": listenUnixBuiltin(),
 
-		//database
+		// database
 		"dbOpen": dbOpenBuiltin(),
 
-		//time
+		// time
 		"newTime":  newTimeBuiltin(),
 		"newDate":  newDateBuiltin(),
 		"unixTime": unixTimeBuiltin(),
 
-		//sync
+		// sync
 		"newCond":      newCondBuiltin(),
 		"newOnce":      newOnceBuiltin(),
 		"newMutex":     newMutexBuiltin(),
 		"newRWMutex":   newRWMutexBuiltin(),
 		"newWaitGroup": newWaitGroupBuiltin(),
 
-		//pipe
+		// pipe
 		"newPipe": newPipeBuiltin(),
 
-		//Logger
+		// Logger
 		"newLogger": newLoggerBuiltin(),
 
-		//container
+		// container
 		"newList": newListBuiltin(),
 
-		//deepEqual
+		// deepEqual
 		"deepEqual": newDeepEqualBuiltin(),
 
-		//csv
+		// csv
 		"newCsvReader": newCsvReaderBuiltin(),
 		"newCsvWriter": newCsvWriterBuiltin(),
 
-		//class related
+		// class related
 		"is_a":       instanceOfBuiltin(),
 		"instanceOf": instanceOfBuiltin(),
 		"classOf":    classOfBuiltin(),

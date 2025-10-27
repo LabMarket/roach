@@ -143,7 +143,7 @@ func (a *Array) Get(line string, args ...Object) Object {
 	// if out-of-bounds, return NIL
 	if idxObj.Int64 < 0 || idxObj.Int64 >= int64(len(a.Members)) {
 		return NIL
-		//return NewError(line, INDEXERROR, idxObj.Int64)
+		// return NewError(line, INDEXERROR, idxObj.Int64)
 	}
 	return a.Members[idxObj.Int64]
 }
@@ -163,7 +163,7 @@ func (a *Array) Set(line string, args ...Object) Object {
 		for i := oldLen; i <= idxObj.Int64; i++ {
 			a.Members = append(a.Members, NIL)
 		}
-		//return NewError(line, INDEXERROR, idxObj.Int64)
+		// return NewError(line, INDEXERROR, idxObj.Int64)
 	}
 
 	a.Members[idxObj.Int64] = args[1]
@@ -304,8 +304,8 @@ func (a *Array) Push(line string, args ...Object) Object {
 
 func (a *Array) Shift(line string, args ...Object) Object {
 	last := len(a.Members) - 1
-	if len(args) == 0 { //arrObj.shift()
-		if last < 0 { //array is empty
+	if len(args) == 0 { // arrObj.shift()
+		if last < 0 { // array is empty
 			return NIL
 		}
 		shifted := a.Members[0]
@@ -361,7 +361,6 @@ func (a *Array) Reduce(line string, scope *Scope, args ...Object) Object {
 		}
 	}
 	return r
-
 }
 
 func (a *Array) Empty(line string, args ...Object) Object {
@@ -412,7 +411,7 @@ func (a *Array) Tail(line string, args ...Object) Object {
 		return NIL
 	}
 
-	newMembers := make([]Object, length+1, length+1)
+	newMembers := make([]Object, length+1)
 	copy(newMembers, a.Members)
 	return &Array{Members: newMembers}
 }
@@ -584,14 +583,14 @@ func (a *Array) MarshalJSON() ([]byte, error) {
 			return []byte{}, err
 		}
 		out.WriteString(res.String())
-	} //end for
+	} // end for
 	out.WriteString("]")
 
 	return out.Bytes(), nil
 }
 
 func (a *Array) UnmarshalJSON(b []byte) error {
-	//Using Decoder to parse the bytes.
+	// Using Decoder to parse the bytes.
 	in := bytes.TrimSpace(b)
 	dec := json.NewDecoder(bytes.NewReader(in))
 
