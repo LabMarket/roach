@@ -1,6 +1,8 @@
 package eval
 
 import (
+	"os"
+
 	"roach/version"
 )
 
@@ -16,6 +18,9 @@ func NewLangObj() Object {
 	SetGlobalObj(lang_name, ret)
 
 	SetGlobalObj(lang_name+".Version", NewString(version.Version))
+	SetGlobalObj(lang_name+".Major", NewString(version.Major))
+	SetGlobalObj(lang_name+".Minor", NewString(version.Minor))
+	SetGlobalObj(lang_name+".Release", NewString(version.Release))
 	SetGlobalObj(lang_name+".BuildNumber", NewString(version.BuildNumber))
 
 	return ret
@@ -29,16 +34,21 @@ func (t *LangObj) Type() ObjectType { return LANG_OBJ }
 
 func (t *LangObj) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
 	switch method {
-	case "Version":
-		return NewString(version.Version)
-	case "Major":
-		return NewString(version.Major)
-	case "Minor":
-		return NewString(version.Minor)
-	case "Release":
-		return NewString(version.Release)
-	case "BuildNumber":
-		return NewString(version.BuildNumber)
+	case "Arguments":
+		return t.Arguments(line, args...)
 	}
 	return NewError(line, NOMETHODERROR, method, t.Type())
+}
+
+func (t *LangObj) Arguments(line string, args ...Object) Object {
+	if len(args) != 0 {
+		return NewError(line, ARGUMENTERROR, "0", len(args))
+	}
+
+	r := &Array{}
+	r.Members = []Object{}
+	for _, arg := range os.Args[1:] {
+		r.Members = append(r.Members, NewString(arg))
+	}
+	return r
 }
