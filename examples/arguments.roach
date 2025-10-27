@@ -1,0 +1,15 @@
+#!/usr/bin/env roach
+
+//
+// This program dumps the command-line arguments the script received.
+//
+
+println( "Roach version:", lang.Version(), ".", lang.BuildNumber() )
+
+let a = lang.Arguments()
+
+println( "We received ", len(a), " arguments to our script" )
+
+for( i = 0; i < len(a); i++ ) {
+   println( "\t", i, " " , a[i])
+}
