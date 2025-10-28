@@ -5,3 +5,19 @@
 //
 
 let gpt = llmConnect()
+
+println("============ Connection data ====================================")
+println("Host: ", gpt.host)
+println("Moldel: ", gpt.model)
+
+println("========== Context Parameters ===================================")
+println("CtxSize: ", gpt.ctxSize)
+println("NumGPU: ", gpt.numGPU)
+println("NumBatch: ", gpt.numBatch)
+
+println("========= Inference Parameters ==================================")
+println("Temperature: ", gpt.temperature)
+println("NumThread: ", gpt.numThread)
+println("NumPredict: ", gpt.numPredict)
+println("RepeatPenalty: ", gpt.repeatPenalty)
+println("=================================================================")

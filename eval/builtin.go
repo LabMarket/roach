@@ -1136,7 +1136,23 @@ func llmConnectBuiltin() *Builtin {
 			if err != nil {
 				return NewNil(err.Error())
 			}
-			return &LLMClientObject{Client: client}
+			host := GetEnvStr("OLLAMA_HOST", "http://127.0.0.1:11434")
+			ret := &LLMClientObject{Client: client, Host: host}
+
+			ret.SetModel(line, NewString(GetEnvStr("OLLAMA_MODEL", "llama2")))
+
+			// Context window
+			ret.SetCtxSize(line, NewInteger(GetEnvInt("LLM_NUM_CTX", 8192)))
+			ret.SetNumGPU(line, NewInteger(GetEnvInt("LLM_NUM_GPU", 99)))
+			ret.SetNumBatch(line, NewInteger(GetEnvInt("LLM_NUM_BATCH", 512)))
+
+			// Inference tunning
+			ret.SetTemperature(line, NewFloat(GetEnvFloat("LLM_TEMPERATURE", 0.7)))
+			ret.SetNumThread(line, NewInteger(GetEnvInt("LLM_NUM_THREAD", 16)))
+			ret.SetNumPredict(line, NewInteger(GetEnvInt("LLM_NUM_PREDICT", -1)))
+			ret.SetRepeatPenalty(line, NewFloat(GetEnvFloat("LLM_REPEAT_PENALTY", 1.1)))
+
+			return ret
 		},
 	}
 }
