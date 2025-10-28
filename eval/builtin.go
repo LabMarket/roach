@@ -17,6 +17,8 @@ import (
 	"unicode/utf8"
 
 	"roach/ast"
+
+	"github.com/ollama/ollama/api"
 )
 
 var fileModeTable = map[string]int{
@@ -1127,6 +1129,18 @@ func listenUnixBuiltin() *Builtin {
 	}
 }
 
+func llmConnectBuiltin() *Builtin {
+	return &Builtin{
+		Fn: func(line string, scope *Scope, args ...Object) Object {
+			client, err := api.ClientFromEnvironment()
+			if err != nil {
+				return NewNil(err.Error())
+			}
+			return &LLMClientObject{Client: client}
+		},
+	}
+}
+
 func dbOpenBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, scope *Scope, args ...Object) Object {
@@ -1543,6 +1557,9 @@ func init() {
 		"dialUDP":    dialUDPBuiltin(),
 		"dialUnix":   dialUnixBuiltin(),
 		"listenUnix": listenUnixBuiltin(),
+
+		// llm
+		"llmConnect": llmConnectBuiltin(),
 
 		// database
 		"dbOpen": dbOpenBuiltin(),

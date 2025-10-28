@@ -2,7 +2,7 @@ package main
 
 import (
 	"bufio"
-	"embed"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -19,33 +19,9 @@ import (
 	"roach/parser"
 	"roach/repl"
 	"roach/version"
+
+	"github.com/joho/godotenv"
 )
-
-//go:embed stdlib
-var stdlib embed.FS
-
-// loadAndEvaluateStdlib reads and evaluates all embedded standard library files.
-func loadStdlib() error {
-	wd, err := os.Getwd()
-	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
-	entries, err := stdlib.ReadDir(wd + "/stdlib")
-	if err != nil {
-		return fmt.Errorf("failed to read embedded stdlib directory: %w", err)
-	}
-
-	for _, entry := range entries {
-		if !strings.HasSuffix(entry.Name(), ".roach") {
-			continue
-		}
-
-		filePath := "stdlib/" + entry.Name()
-		runProgram(false, string(filePath))
-	}
-	return nil
-}
 
 func runProgram(debug bool, filename string) {
 	wd, err := os.Getwd()
@@ -241,29 +217,51 @@ func RegisterGoGlobals() {
 	})
 }
 
-func main() {
-	loadStdlib()
+func processEnvFiles(envFiles string) {
+	if envFiles != "" {
+		files := strings.Split(envFiles, ",")
+		for _, file := range files {
+			if err := godotenv.Load(file); err != nil {
+				fmt.Printf("Error loading environment file %s: %v\n", file, err)
+			} else {
+				fmt.Printf("Loaded environment file %s\n", file)
+			}
+		}
+	} else {
+		fmt.Println("No environment files specified.")
+	}
+}
 
-	args := os.Args[1:]
-	// We must reset `os.Args`, or the `flag` module will not functioning correctly
-	os.Args = os.Args[1:]
+func printVersion() {
+	fmt.Println("Roach Language Interpreter")
+	fmt.Println("Version: ", version.Version)
+	fmt.Println("BuildNumber: ", version.BuildNumber)
+}
+
+func main() {
+	var showVersion bool
+	var debugMode bool
+	var envFiles string
+
+	flag.BoolVar(&showVersion, "v", false, "Print version information")
+	flag.BoolVar(&debugMode, "d", false, "Enable debug mode")
+	flag.StringVar(&envFiles, "e", "", "Comma-separated list of .env files to load")
+
+	flag.Parse()
+
+	if showVersion {
+		printVersion()
+	}
+
+	processEnvFiles(envFiles)
+
+	args := flag.Args()
+
 	if len(args) == 0 {
 		fmt.Println("Roach programming language REPL")
 		repl.Start(os.Stdout, true)
 	} else {
-		if len(args) == 2 {
-			if args[0] == "-d" || args[0] == "--debug" { // debug
-				runProgram(true, args[1])
-				os.Exit(0)
-			}
-		}
-		if args[0] == "-v" || args[0] == "--version" {
-			fmt.Println("Roach Language Interpreter")
-			fmt.Println("Version: ", version.Version)
-			fmt.Println("BuildNumber: ", version.BuildNumber)
-		} else {
-			runProgram(false, args[0])
-		}
+		runProgram(debugMode, args[0])
 		os.Exit(0)
 	}
 }

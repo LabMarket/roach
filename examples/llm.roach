@@ -1,0 +1,7 @@
+#!/usr/bin/env roach
+
+//
+// This program run a LLM/GPT model
+//
+
+let gpt = llmConnect()

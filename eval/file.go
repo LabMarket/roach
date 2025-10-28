@@ -4,7 +4,6 @@ import (
 	"bufio"
 	_ "fmt"
 	"io"
-	"io/ioutil"
 	"os"
 )
 
@@ -54,7 +53,7 @@ func (i *IOUtilObj) ReadAll(line string, args ...Object) Object {
 	}
 
 	reader := bufio.NewReader(fObj.File)
-	b, err := ioutil.ReadAll(reader)
+	b, err := io.ReadAll(reader)
 	if err != nil {
 		return NewNil(err.Error())
 	}
@@ -98,7 +97,7 @@ func (i *IOUtilObj) ReadFile(line string, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "readFile", "*String", args[0].Type())
 	}
 
-	b, err := ioutil.ReadFile(filename.String)
+	b, err := os.ReadFile(filename.String)
 	if err != nil {
 		return NewNil(err.Error())
 	}
@@ -121,7 +120,7 @@ func (i *IOUtilObj) TempDir(line string, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "second", "tempDir", "*String", args[1].Type())
 	}
 
-	name, err := ioutil.TempDir(dir.String, prefix.String)
+	name, err := os.MkdirTemp(dir.String, prefix.String)
 	if err != nil {
 		return NewNil(err.Error())
 	}
@@ -144,7 +143,7 @@ func (i *IOUtilObj) TempFile(line string, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "second", "tempFile", "*String", args[1].Type())
 	}
 
-	f, err := ioutil.TempFile(dir.String, prefix.String)
+	f, err := os.CreateTemp(dir.String, prefix.String)
 	if err != nil {
 		return NewNil(err.Error())
 	}
@@ -172,7 +171,7 @@ func (i *IOUtilObj) WriteFile(line string, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "third", "writeFile", "*String", args[2].Type())
 	}
 
-	err := ioutil.WriteFile(filename.String, []byte(data.String), os.FileMode(int(perm.Int64)))
+	err := os.WriteFile(filename.String, []byte(data.String), os.FileMode(int(perm.Int64)))
 	if err != nil {
 		return NewFalseObj(err.Error())
 	}
