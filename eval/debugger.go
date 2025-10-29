@@ -27,8 +27,8 @@ const (
 
 type DbgInfo struct {
 	filename string
-	line     int  //node's begin line
-	entered  bool //true if the same line has been evaluated.
+	line     int  // node's begin line
+	entered  bool // true if the same line has been evaluated.
 }
 
 type Debugger struct {
@@ -38,8 +38,8 @@ type Debugger struct {
 
 	Functions map[string]*ast.FunctionLiteral
 
-	//for breakpoint
-	Breakpoints map[string]bool //key: 'filename:line'
+	// for breakpoint
+	Breakpoints map[string]bool // key: 'filename:line'
 
 	Node  ast.Node
 	Scope *Scope
@@ -71,9 +71,7 @@ func (d *Debugger) AddBP(filename string, line int) {
 // Delete a breakpoint at source line
 func (d *Debugger) DelBP(filename string, line int) {
 	key := fmt.Sprintf("%s:%d", strings.TrimSpace(filename), line)
-	if _, ok := d.Breakpoints[key]; ok {
-		delete(d.Breakpoints, key)
-	}
+	delete(d.Breakpoints, key)
 }
 
 // Check if a source line is at a breakpoint
@@ -142,7 +140,7 @@ func (d *Debugger) ProcessCommand() {
 		} else {
 			content, _ := ioutil.ReadFile(p.Filename)
 			lines := strings.Split(string(content), "\n")
-			//pre-append an empty line, so the Lines start with 1, not zero.
+			// pre-append an empty line, so the Lines start with 1, not zero.
 			lines = append([]string{""}, lines...)
 			d.SrcLinesCache[p.Filename] = lines
 			d.SrcLines = lines
@@ -225,7 +223,7 @@ func (d *Debugger) ProcessCommand() {
 		} else {
 			fmt.Printf("Undefined command: '%s'.  Try 'help'.\n", command)
 		}
-	} //end for
+	} // end for
 }
 
 // Check if node can be stopped, some nodes cannot be stopped,
@@ -376,7 +374,7 @@ func (d *Debugger) processBreakPointCmd(command string, add_or_del int) {
 	if len(arr) < 2 {
 		fmt.Println("Line number expected.")
 	} else {
-		//get filename & line/function separator
+		// get filename & line/function separator
 		filename, breakTxt := getCommandTxt(arr[1:], p)
 
 		line, err := strconv.Atoi(breakTxt)
@@ -415,9 +413,9 @@ func (d *Debugger) processBreakPointCmd(command string, add_or_del int) {
 // returns 'filename, line/func'
 func getCommandTxt(command []string, pos token.Position) (string, string) {
 	breakInfTxt := strings.Join(command, " ")
-	breakInfTxt = strings.ReplaceAll(breakInfTxt, " ", "") //remove all spaces
+	breakInfTxt = strings.ReplaceAll(breakInfTxt, " ", "") // remove all spaces
 
-	//get filename & line/function separator
+	// get filename & line/function separator
 	var filename string
 	var breakTxt string
 	idx := strings.Index(breakInfTxt, ":")
