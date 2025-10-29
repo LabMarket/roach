@@ -3,7 +3,6 @@ package eval
 import (
 	"bufio"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -138,7 +137,7 @@ func (d *Debugger) ProcessCommand() {
 		if ok {
 			d.SrcLines = contents
 		} else {
-			content, _ := ioutil.ReadFile(p.Filename)
+			content, _ := os.ReadFile(p.Filename)
 			lines := strings.Split(string(content), "\n")
 			// pre-append an empty line, so the Lines start with 1, not zero.
 			lines = append([]string{""}, lines...)
