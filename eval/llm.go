@@ -41,42 +41,44 @@ func (t *LLMClientObject) CallMethod(line string, scope *Scope, method string, a
 	case "host":
 		return NewString(t.Host)
 	case "setModel":
-		return t.SetModel(line, args...)
+		return t.setModel(line, args...)
 	case "model":
 		return NewString(t.model)
 	case "setCtxSize":
-		return t.SetCtxSize(line, args...)
+		return t.setCtxSize(line, args...)
 	case "ctxSize":
 		return NewInteger(t.ctxSize)
 	case "setNumGPU":
-		return t.SetNumGPU(line, args...)
+		return t.setNumGPU(line, args...)
 	case "numGPU":
 		return NewInteger(t.numGPU)
 	case "setNumBatch":
-		return t.SetNumBatch(line, args...)
+		return t.setNumBatch(line, args...)
 	case "numBatch":
 		return NewInteger(t.numBatch)
 	case "setTemperature":
-		return t.SetTemperature(line, args...)
+		return t.setTemperature(line, args...)
 	case "temperature":
 		return NewFloat(t.temperature)
 	case "setNumThread":
-		return t.SetNumThread(line, args...)
+		return t.setNumThread(line, args...)
 	case "numThread":
 		return NewInteger(t.numThread)
 	case "setNumPredict":
-		return t.SetNumPredict(line, args...)
+		return t.setNumPredict(line, args...)
 	case "numPredict":
 		return NewInteger(t.numPredict)
 	case "setRepeatPenalty":
-		return t.SetRepeatPenalty(line, args...)
+		return t.setRepeatPenalty(line, args...)
 	case "repeatPenalty":
 		return NewFloat(t.repeatPenalty)
+	case "generate":
+		return t.generate(line, args...)
 	}
 	return NewError(line, NOMETHODERROR, method, t.Type())
 }
 
-func (t *LLMClientObject) SetModel(line string, args ...Object) Object {
+func (t *LLMClientObject) setModel(line string, args ...Object) Object {
 	if len(args) != 1 {
 		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
@@ -90,7 +92,7 @@ func (t *LLMClientObject) SetModel(line string, args ...Object) Object {
 	return NIL
 }
 
-func (t *LLMClientObject) SetCtxSize(line string, args ...Object) Object {
+func (t *LLMClientObject) setCtxSize(line string, args ...Object) Object {
 	if len(args) != 1 {
 		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
@@ -104,7 +106,7 @@ func (t *LLMClientObject) SetCtxSize(line string, args ...Object) Object {
 	return NIL
 }
 
-func (t *LLMClientObject) SetNumGPU(line string, args ...Object) Object {
+func (t *LLMClientObject) setNumGPU(line string, args ...Object) Object {
 	if len(args) != 1 {
 		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
@@ -118,7 +120,7 @@ func (t *LLMClientObject) SetNumGPU(line string, args ...Object) Object {
 	return NIL
 }
 
-func (t *LLMClientObject) SetNumBatch(line string, args ...Object) Object {
+func (t *LLMClientObject) setNumBatch(line string, args ...Object) Object {
 	if len(args) != 1 {
 		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
@@ -132,7 +134,7 @@ func (t *LLMClientObject) SetNumBatch(line string, args ...Object) Object {
 	return NIL
 }
 
-func (t *LLMClientObject) SetTemperature(line string, args ...Object) Object {
+func (t *LLMClientObject) setTemperature(line string, args ...Object) Object {
 	if len(args) != 1 {
 		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
@@ -146,7 +148,7 @@ func (t *LLMClientObject) SetTemperature(line string, args ...Object) Object {
 	return NIL
 }
 
-func (t *LLMClientObject) SetNumThread(line string, args ...Object) Object {
+func (t *LLMClientObject) setNumThread(line string, args ...Object) Object {
 	if len(args) != 1 {
 		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
@@ -160,7 +162,7 @@ func (t *LLMClientObject) SetNumThread(line string, args ...Object) Object {
 	return NIL
 }
 
-func (t *LLMClientObject) SetNumPredict(line string, args ...Object) Object {
+func (t *LLMClientObject) setNumPredict(line string, args ...Object) Object {
 	if len(args) != 1 {
 		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
@@ -174,7 +176,7 @@ func (t *LLMClientObject) SetNumPredict(line string, args ...Object) Object {
 	return NIL
 }
 
-func (t *LLMClientObject) SetRepeatPenalty(line string, args ...Object) Object {
+func (t *LLMClientObject) setRepeatPenalty(line string, args ...Object) Object {
 	if len(args) != 1 {
 		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
@@ -185,5 +187,13 @@ func (t *LLMClientObject) SetRepeatPenalty(line string, args ...Object) Object {
 	}
 
 	t.repeatPenalty = n.Float64
+	return NIL
+}
+
+func (t *LLMClientObject) generate(line string, args ...Object) Object {
+	if len(args) != 1 {
+		return NewError(line, ARGUMENTERROR, "1", len(args))
+	}
+
 	return NIL
 }
