@@ -40,11 +40,14 @@ var (
 		"string",
 		"array",
 		"tuple",
-		"hash"}
+		"hash",
+	}
 )
 
-var importScope *Scope
-var importedCache map[string]Object
+var (
+	importScope   *Scope
+	importedCache map[string]Object
+)
 
 var mux sync.Mutex
 
@@ -53,17 +56,19 @@ var REPLColor bool
 
 const ServiceHint = "* Running on %s (Press CTRL+C to quit)\n"
 
-var Dbg *Debugger
-var MsgHandler *message.MessageHandler
+var (
+	Dbg        *Debugger
+	MsgHandler *message.MessageHandler
+)
 
 type Context struct {
-	N []ast.Node //N: node
-	S *Scope     //S: Scope
+	N []ast.Node // N: node
+	S *Scope     // S: Scope
 }
 
 func PanicToError(p interface{}, node ast.Node) error {
 	switch e := p.(type) {
-	case *Error: //Error Object defined in errors.go file
+	case *Error: // Error Object defined in errors.go file
 		return fmt.Errorf("%s - Line:%s", e.Inspect(), node.Pos().Sline())
 	case error:
 		return fmt.Errorf("%s - Line:%s", e, node.Pos().Sline())
@@ -81,7 +86,7 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 		if r := recover(); r != nil {
 			err := PanicToError(r, node)
 			fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-			//WHY return NIL? if we do not return 'NIL', we may get something like below:
+			// WHY return NIL? if we do not return 'NIL', we may get something like below:
 			//    PANIC=runtime error: invalid memory address or nil pointer
 			val = NIL
 		}
@@ -94,7 +99,7 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 		}
 	}
 
-	//fmt.Printf("node.Type=%T, node=<%s>, start=%d, end=%d\n", node, node.String(), node.Pos().Line, node.End().Line) //debugging
+	// fmt.Printf("node.Type=%T, node=<%s>, start=%d, end=%d\n", node, node.String(), node.Pos().Line, node.End().Line) //debugging
 	switch node := node.(type) {
 	case *ast.Program:
 		return evalProgram(node, scope)
@@ -237,34 +242,34 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 	case *ast.Pipe:
 		return evalPipeExpression(node, scope)
 
-	//Class related
+	// Class related
 	case *ast.ClassStatement:
 		return evalClassStatement(node, scope)
 	case *ast.ClassLiteral:
 		return evalClassLiteral(node, scope)
 	case *ast.NewExpression:
 		return evalNewExpression(node, scope)
-	//using
+	// using
 	case *ast.UsingStmt:
 		return evalUsingStatement(node, scope)
 
-	//command expression
+	// command expression
 	case *ast.CmdExpression:
 		return evalCmdExpression(node, scope)
 
-	//linq query expression
+	// linq query expression
 	case *ast.QueryExpr:
 		return evalLinqQueryExpression(node, scope)
 
-	//await expression
+	// await expression
 	case *ast.AwaitExpr:
 		return evalAwaitExpression(node, scope)
 
-	//service statement
+	// service statement
 	case *ast.ServiceStatement:
 		return evalServiceStatement(node, scope)
 
-	//date time object
+	// date time object
 	case *ast.DateTimeExpr:
 		if node.Pattern == nil {
 			return &TimeObj{Tm: time.Now(), Valid: true}
@@ -278,7 +283,7 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 			dt.Valid = false
 		}
 		return dt
-	//diamond: <$fobj>
+	// diamond: <$fobj>
 	case *ast.DiamondExpr:
 		return evalDiamondExpr(node, scope)
 	}
@@ -305,7 +310,7 @@ func evalProgram(program *ast.Program, scope *Scope) (results Object) {
 		case *Error:
 			return s
 		case *Throw:
-			//convert ThrowValue to Errors
+			// convert ThrowValue to Errors
 			return NewError(s.stmt.Pos().Sline(), THROWNOTHANDLED, s.value.Inspect())
 		}
 	}
@@ -330,7 +335,6 @@ func loadImports(imports map[string]*ast.ImportStatement, scope *Scope) Object {
 
 // Statements...
 func evalImportStatement(i *ast.ImportStatement, scope *Scope) Object {
-
 	mux.Lock()
 	defer mux.Unlock()
 
@@ -346,7 +350,7 @@ func evalImportStatement(i *ast.ImportStatement, scope *Scope) Object {
 		importScope.Set(i.ImportPath, imported)
 	}
 
-	//store the evaluated result to cache
+	// store the evaluated result to cache
 	importedCache[i.ImportPath] = imported
 
 	return imported
@@ -381,7 +385,7 @@ func evalLetStatement(l *ast.LetStatement, scope *Scope) (val Object) {
 			arr := v.(*Array)
 			valuesLen := len(arr.Members)
 			for idx, item := range l.Names {
-				if idx >= valuesLen { //There are more Names than Values
+				if idx >= valuesLen { // There are more Names than Values
 					if item.Token.Type != token.UNDERSCORE {
 						val = NIL
 						scope.Set(item.String(), val)
@@ -403,7 +407,7 @@ func evalLetStatement(l *ast.LetStatement, scope *Scope) (val Object) {
 			tup := v.(*Tuple)
 			valuesLen := len(tup.Members)
 			for idx, item := range l.Names {
-				if idx >= valuesLen { //There are more Names than Values
+				if idx >= valuesLen { // There are more Names than Values
 					if item.Token.Type != token.UNDERSCORE {
 						val = NIL
 						scope.Set(item.String(), val)
@@ -453,7 +457,7 @@ func evalLetStatement(l *ast.LetStatement, scope *Scope) (val Object) {
 	}
 
 	for idx, item := range l.Names {
-		if idx >= valuesLen { //There are more Names than Values
+		if idx >= valuesLen { // There are more Names than Values
 			if item.Token.Type != token.UNDERSCORE {
 				val = NIL
 				scope.Set(item.String(), val)
@@ -500,7 +504,7 @@ func evalNumAssignExpression(a *ast.AssignExpression, name string, left Object, 
 		leftVal = left.(*Float).Float64
 	}
 
-	//Check `right`'s type
+	// Check `right`'s type
 	if val.Type() == INTEGER_OBJ {
 		rightVal = float64(val.(*Integer).Int64)
 	} else if val.Type() == UINTEGER_OBJ {
@@ -513,12 +517,12 @@ func evalNumAssignExpression(a *ast.AssignExpression, name string, left Object, 
 	switch a.Token.Literal {
 	case "+=":
 		result := leftVal + rightVal
-		if isInt { //only 'INTEGER + INTEGER'
+		if isInt { // only 'INTEGER + INTEGER'
 			ret, ok = scope.Reset(name, NewInteger(int64(result)))
 			if ok {
 				return
 			}
-		} else if isUInt { //only 'UINTEGER + UINTEGER'
+		} else if isUInt { // only 'UINTEGER + UINTEGER'
 			ret, ok = scope.Reset(name, NewUInteger(uint64(result)))
 			if ok {
 				return
@@ -577,7 +581,7 @@ func evalNumAssignExpression(a *ast.AssignExpression, name string, left Object, 
 		}
 
 		result := leftVal / rightVal
-		//Always return Float
+		// Always return Float
 		ret, ok = scope.Reset(name, NewFloat(result))
 		if ok {
 			return
@@ -675,7 +679,7 @@ func evalStrAssignExpression(a *ast.AssignExpression, name string, left Object, 
 	switch a.Token.Literal {
 	case "=":
 		switch nodeType := a.Name.(type) {
-		case *ast.IndexExpression: //str[idx] = xxx
+		case *ast.IndexExpression: // str[idx] = xxx
 			index := Eval(nodeType.Index, scope)
 			if index == NIL {
 				ret = NIL
@@ -707,7 +711,6 @@ func evalStrAssignExpression(a *ast.AssignExpression, name string, left Object, 
 		return
 	}
 	return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
-
 }
 
 // array[idx] = item
@@ -729,7 +732,7 @@ func evalArrayAssignExpression(a *ast.AssignExpression, name string, left Object
 		}
 	case "=":
 		switch nodeType := a.Name.(type) {
-		case *ast.IndexExpression: //arr[idx] = xxx
+		case *ast.IndexExpression: // arr[idx] = xxx
 			index := Eval(nodeType.Index, scope)
 			if index == NIL {
 				ret = NIL
@@ -747,13 +750,13 @@ func evalArrayAssignExpression(a *ast.AssignExpression, name string, left Object
 				return NewError(a.Pos().Sline(), INDEXERROR, idx)
 			}
 
-			if idx < int64(len(leftVals)) { //index is in range
+			if idx < int64(len(leftVals)) { // index is in range
 				leftVals[idx] = val
 				ret, ok = scope.Reset(name, &Array{Members: leftVals})
 				if ok {
 					return
 				}
-			} else { //index is out of range, we auto-expand the array
+			} else { // index is out of range, we auto-expand the array
 				for i := int64(len(leftVals)); i < idx; i++ {
 					leftVals = append(leftVals, NIL)
 				}
@@ -773,8 +776,8 @@ func evalArrayAssignExpression(a *ast.AssignExpression, name string, left Object
 }
 
 func evalTupleAssignExpression(a *ast.AssignExpression, name string, left Object, scope *Scope, val Object) (ret Object) {
-	//Tuple is an immutable sequence of values
-	if a.Token.Literal == "=" { //tuple[idx] = item
+	// Tuple is an immutable sequence of values
+	if a.Token.Literal == "=" { // tuple[idx] = item
 		str := fmt.Sprintf("%s[IDX]", TUPLE_OBJ)
 		return NewError(a.Pos().Sline(), INFIXOP, str, a.Token.Literal, val.Type())
 	}
@@ -787,7 +790,7 @@ func evalHashAssignExpression(a *ast.AssignExpression, name string, left Object,
 	var ok bool
 	switch a.Token.Literal {
 	case "+=":
-		if _, ok := val.(*Hash); !ok { //must be hash type
+		if _, ok := val.(*Hash); !ok { // must be hash type
 			return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 		}
 
@@ -814,11 +817,11 @@ func evalHashAssignExpression(a *ast.AssignExpression, name string, left Object,
 		return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 	case "=":
 		switch nodeType := a.Name.(type) {
-		case *ast.IndexExpression: //hashObj[key] = val
+		case *ast.IndexExpression: // hashObj[key] = val
 			key := Eval(nodeType.Index, scope)
 			leftHash.Push(a.Pos().Sline(), key, val)
 			return leftHash
-		case *ast.Identifier: //hashObj.key = val
+		case *ast.Identifier: // hashObj.key = val
 			key := strings.Split(a.Name.String(), ".")[1]
 			keyObj := NewString(key)
 			leftHash.Push(a.Pos().Sline(), keyObj, val)
@@ -895,14 +898,14 @@ func evalClassIndexerAssignExpression(a *ast.AssignExpression, obj Object, index
 
 	propName := "this" + fmt.Sprintf("%d", num)
 
-	//check if the Indexer is static
+	// check if the Indexer is static
 	if instanceObj.IsStatic(propName, ClassPropertyKind) {
 		return NewError(a.Pos().Sline(), INDEXERSTATICERROR, instanceObj.Class.Name)
 	}
 
 	p := instanceObj.GetProperty(propName)
 	if p != nil {
-		//no setter or setter block is empty, e.g. 'property xxx { set; }'
+		// no setter or setter block is empty, e.g. 'property xxx { set; }'
 		if p.Setter == nil || len(p.Setter.Body.Statements) == 0 {
 			return NewError(a.Pos().Sline(), INDEXERUSEERROR, instanceObj.Class.Name)
 		} else {
@@ -949,15 +952,15 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 			case *Hash:
 				switch c := o.Call.(type) {
 				case *ast.Identifier:
-					//e.g.
-					//doc = {"one": {"two": { "three": [1, 2, 3,] }}}
-					//doc.one.two.three = 44
+					// e.g.
+					// doc = {"one": {"two": { "three": [1, 2, 3,] }}}
+					// doc.one.two.three = 44
 					m.Push(a.Pos().Sline(), NewString(c.Value), val)
 					return
 				case *ast.IndexExpression:
-					//e.g.
-					//doc = {"one": {"two": { "three": [1, 2, 3,] }}}
-					//doc.one.two.three[2] = 44
+					// e.g.
+					// doc = {"one": {"two": { "three": [1, 2, 3,] }}}
+					// doc.one.two.three[2] = 44
 					leftVal := m.Get(a.Pos().Sline(), NewString(c.Left.String()))
 					indexVal := Eval(c.Index, scope)
 					switch v := leftVal.(type) {
@@ -979,14 +982,14 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 		strArr := strings.Split(a.Name.String(), ".")
 		if aObj, ok = scope.Get(strArr[0]); !ok {
 			return reportTypoSuggestions(a.Pos().Sline(), scope, strArr[0])
-			//return NewError(a.Pos().Sline(), UNKNOWNIDENT, strArr[0])3
+			// return NewError(a.Pos().Sline(), UNKNOWNIDENT, strArr[0])3
 		}
 
-		if aObj.Type() == ENUM_OBJ { //it's enum type
+		if aObj.Type() == ENUM_OBJ { // it's enum type
 			return NewError(a.Pos().Sline(), GENERICERROR, "Enum value cannot be reassigned!")
-		} else if aObj.Type() == HASH_OBJ { //e.g. hash.key = value
+		} else if aObj.Type() == HASH_OBJ { // e.g. hash.key = value
 			return evalHashAssignExpression(a, strArr[0], aObj, scope, val)
-		} else if aObj.Type() == INSTANCE_OBJ { //e.g. this.var = xxxx
+		} else if aObj.Type() == INSTANCE_OBJ { // e.g. this.var = xxxx
 			instanceObj := aObj.(*ObjectInstance)
 
 			//			//get variable's modifier level
@@ -995,9 +998,9 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 			//				return NewError(a.Pos().Sline(), CLSMEMBERPRIVATE, strArr[1], instanceObj.Class.Name)
 			//			}
 
-			//check if it's a property
+			// check if it's a property
 			p := instanceObj.GetProperty(strArr[1])
-			if p == nil { //not property, return value from scope
+			if p == nil { // not property, return value from scope
 				// check if it's a static variable
 				if instanceObj.IsStatic(strArr[1], ClassMemberKind) {
 					return NewError(a.Pos().Sline(), MEMBERUSEERROR, strArr[1], instanceObj.Class.Name)
@@ -1009,9 +1012,9 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 					return NewError(a.Pos().Sline(), PROPERTYUSEERROR, strArr[1], instanceObj.Class.Name)
 				}
 
-				if p.Setter == nil { //property xxx { get; }
+				if p.Setter == nil { // property xxx { get; }
 					_, ok := instanceObj.Scope.Get(strArr[1])
-					if !ok { //it's the first time assignment
+					if !ok { // it's the first time assignment
 						instanceObj.Scope.Set(strArr[1], val)
 					} else {
 						return NewError(a.Pos().Sline(), PROPERTYUSEERROR, strArr[1], instanceObj.Class.Name)
@@ -1030,12 +1033,12 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 				}
 			}
 			return
-		} else if aObj.Type() == CLASS_OBJ { //e.g. parent.var = xxxx
+		} else if aObj.Type() == CLASS_OBJ { // e.g. parent.var = xxxx
 			clsObj := aObj.(*Class)
 
-			//check if it's a property
+			// check if it's a property
 			p := clsObj.GetProperty(strArr[1])
-			if p == nil { //not property
+			if p == nil { // not property
 				// check if it's a static member
 				if !clsObj.IsStatic(strArr[1], ClassMemberKind) {
 					return NewError(a.Pos().Sline(), MEMBERUSEERROR, strArr[1], clsObj.Name)
@@ -1050,7 +1053,7 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 			thisObj, _ := scope.Get("this")
 			if thisObj != nil {
 				if thisObj.Type() == INSTANCE_OBJ { //'this' refers to 'ObjectInstance' object
-					//Check if `thisObj` instance's scope could find `strArr[1]`
+					// Check if `thisObj` instance's scope could find `strArr[1]`
 					_, ok = thisObj.(*ObjectInstance).Scope.Get(strArr[1])
 					if ok {
 						thisObj.(*ObjectInstance).Scope.Set(strArr[1], val)
@@ -1080,12 +1083,12 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 				}
 			}
 
-			if p == nil { //not property
+			if p == nil { // not property
 				clsObj.Scope.Set(strArr[1], val)
 			} else {
-				if p.Setter == nil { //property xxx { get; }
+				if p.Setter == nil { // property xxx { get; }
 					_, ok := clsObj.Scope.Get(strArr[1])
-					if !ok { //it's the first time assignment
+					if !ok { // it's the first time assignment
 						clsObj.Scope.Set(strArr[1], val)
 					} else {
 						return NewError(a.Pos().Sline(), PROPERTYUSEERROR, strArr[1], clsObj.Name)
@@ -1118,7 +1121,7 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 		case *ast.Identifier:
 			name = nodeType.Left.(*ast.Identifier).Value
 
-			//check if it's a class indexer assignment, e.g. 'clsObj[index] = xxx'
+			// check if it's a class indexer assignment, e.g. 'clsObj[index] = xxx'
 			if aObj, ok := scope.Get(name); ok {
 				if aObj.Type() == INSTANCE_OBJ {
 					return evalClassIndexerAssignExpression(a, aObj, nodeType, val, scope)
@@ -1127,8 +1130,8 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 		case *ast.IndexExpression:
 			leftVal := Eval(nodeType.Left, scope)
 			indexVal := Eval(nodeType.Index, scope)
-			//fmt.Printf("leftVal.Value=%v, leftVal.Type=%T, leftVal=%s\n", leftVal, leftVal, leftVal.Inspect())
-			//fmt.Printf("indexVal.Value=%v, indexVal.Type=%T, indexVal=%s\n", indexVal, indexVal, indexVal.Inspect())
+			// fmt.Printf("leftVal.Value=%v, leftVal.Type=%T, leftVal=%s\n", leftVal, leftVal, leftVal.Inspect())
+			// fmt.Printf("indexVal.Value=%v, indexVal.Type=%T, indexVal=%s\n", indexVal, indexVal, indexVal.Inspect())
 			switch v := leftVal.(type) {
 			case *String:
 				v.Set(a.Pos().Sline(), indexVal, val)
@@ -1180,7 +1183,7 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 				}
 			}
 
-			//check if it's a readonly variable
+			// check if it's a readonly variable
 			if scope.IsReadOnly(name) {
 				return NewError(a.Pos().Sline(), CONSTNOTASSIGNERROR, name)
 			}
@@ -1190,7 +1193,7 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 				return v
 			}
 			return reportTypoSuggestions(a.Pos().Sline(), scope, a.Name.String())
-			//return NewError(a.Pos().Sline(), UNKNOWNIDENT, a.Name.String())
+			// return NewError(a.Pos().Sline(), UNKNOWNIDENT, a.Name.String())
 		}
 	}
 
@@ -1199,7 +1202,7 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 	var ok bool
 	if left, ok = scope.Get(name); !ok {
 		return reportTypoSuggestions(a.Pos().Sline(), scope, name)
-		//return NewError(a.Pos().Sline(), UNKNOWNIDENT, name)
+		// return NewError(a.Pos().Sline(), UNKNOWNIDENT, name)
 	}
 
 	switch left.Type() {
@@ -1333,7 +1336,7 @@ func evalRegExLiteral(re *ast.RegExLiteral) Object {
 }
 
 func evalIdentifier(i *ast.Identifier, scope *Scope) Object {
-	//Get from global scope first
+	// Get from global scope first
 	if obj, ok := GetGlobalObj(i.String()); ok {
 		return obj
 	}
@@ -1358,16 +1361,16 @@ func evalHashLiteral(hl *ast.HashLiteral, scope *Scope) Object {
 	hash := NewHash()
 	for _, key := range hl.Order {
 		var k Object
-		switch key.(type) {
-		case *ast.Identifier: //It's an identifier, so it's a bare word.
+		switch key := key.(type) {
+		case *ast.Identifier: // It's an identifier, so it's a bare word.
 			/* e.g. h = {A: "xxxx"}
 			Here when evaluate the hash key 'A', it will evaluate to NIL_OBJ, because it's a bare word and
 			is an identifier, so we need to treat it as string. that is, we want it to become:
 			    h = {"A": "xxxx"}
 			*/
 
-			if _, ok := scope.Get(key.(*ast.Identifier).Value); !ok {
-				t := key.(*ast.Identifier).Value
+			if _, ok := scope.Get(key.Value); !ok {
+				t := key.Value
 				k = NewString(t)
 				innerScope.Set(t, k)
 			}
@@ -1404,7 +1407,7 @@ func evalStructLiteral(s *ast.StructLiteral, scope *Scope) Object {
 
 func evalEnumStatement(enumStmt *ast.EnumStatement, scope *Scope) Object {
 	enumLiteral := evalEnumLiteral(enumStmt.EnumLiteral, scope)
-	scope.Set(enumStmt.Name.String(), enumLiteral) //save to scope
+	scope.Set(enumStmt.Name.String(), enumLiteral) // save to scope
 	return enumLiteral
 }
 
@@ -1435,7 +1438,7 @@ func evalFunctionStatement(FnStmt *ast.FunctionStatement, scope *Scope) Object {
 	if !FnStmt.IsServiceAnno {
 		processClassAnnotation(FnStmt.Annotations, scope, FnStmt.Pos().Sline(), fn)
 	}
-	scope.Set(FnStmt.Name.String(), fnObj) //save to scope
+	scope.Set(FnStmt.Name.String(), fnObj) // save to scope
 
 	return fnObj
 }
@@ -1443,9 +1446,9 @@ func evalFunctionStatement(FnStmt *ast.FunctionStatement, scope *Scope) Object {
 func evalFunctionLiteral(fl *ast.FunctionLiteral, scope *Scope) Object {
 	fn := &Function{Literal: fl, Variadic: fl.Variadic, Scope: scope, Async: fl.Async}
 
-	if fl.Values != nil { //check for default values
+	if fl.Values != nil { // check for default values
 		for _, item := range fl.Parameters {
-			if _, ok := fl.Values[item.String()]; !ok { //if not has default value, then continue
+			if _, ok := fl.Values[item.String()]; !ok { // if not has default value, then continue
 				continue
 			}
 			val := Eval(fl.Values[item.String()], scope)
@@ -1490,8 +1493,8 @@ func evalMetaOperatorPrefixExpression(p *ast.PrefixExpression, right Object, sco
 		return NewError(p.Pos().Sline(), PREFIXOP, p, right.Type())
 	}
 
-	//convert prefix operator to infix operator,
-	//Because 'evalNumberInfixExpression' function need a InfixExpression
+	// convert prefix operator to infix operator,
+	// Because 'evalNumberInfixExpression' function need a InfixExpression
 	infixExp := &ast.InfixExpression{Token: p.Token, Operator: p.Operator, Right: p.Right}
 
 	members := right.(*Array).Members
@@ -1548,7 +1551,7 @@ func evalPrefixExpression(p *ast.PrefixExpression, scope *Scope) Object {
 		return right
 	}
 
-	//User Defined Operator
+	// User Defined Operator
 	if p.Token.Type == token.UDO {
 		return evalPrefixExpressionUDO(p, right, scope)
 	}
@@ -1582,7 +1585,7 @@ func evalPrefixExpression(p *ast.PrefixExpression, scope *Scope) Object {
 				args := []Object{right}
 				return evalFunctionDirect(method, args, instanceObj, newScope, nil)
 			case *BuiltinMethod:
-				//do nothing for now
+				// do nothing for now
 			}
 		}
 		return NewError(p.Pos().Sline(), PREFIXOP, p, right.Type())
@@ -1593,11 +1596,11 @@ func evalPrefixExpression(p *ast.PrefixExpression, scope *Scope) Object {
 		return evalBangOperatorExpression(right)
 	case "+":
 		switch right.Type() {
-		case STRING_OBJ: //convert string to number
+		case STRING_OBJ: // convert string to number
 			var n int64
 			var err error
 
-			var content = right.(*String).String
+			content := right.(*String).String
 			if strings.HasPrefix(content, "0b") {
 				n, err = strconv.ParseInt(content[2:], 2, 64)
 			} else if strings.HasPrefix(content, "0x") {
@@ -1623,8 +1626,8 @@ func evalPrefixExpression(p *ast.PrefixExpression, scope *Scope) Object {
 				return NewError(p.Pos().Sline(), PREFIXOP, p, right.Type())
 			}
 			return NewInteger(n)
-		case BOOLEAN_OBJ: //convert boolean to string
-			var b = right.(*Boolean)
+		case BOOLEAN_OBJ: // convert boolean to string
+			b := right.(*Boolean)
 			if !b.Valid {
 				return NewString("false")
 			}
@@ -1641,9 +1644,9 @@ func evalPrefixExpression(p *ast.PrefixExpression, scope *Scope) Object {
 		case INTEGER_OBJ:
 			i := right.(*Integer)
 			return NewInteger(-i.Int64)
-			//bug : we need to return a new 'Integer' object, we should not change the original 'Integer' object.
-			//i.Int64 = -i.Int64
-			//return i
+			// bug : we need to return a new 'Integer' object, we should not change the original 'Integer' object.
+			// i.Int64 = -i.Int64
+			// return i
 		case UINTEGER_OBJ:
 			i := right.(*UInteger)
 			if i.UInt64 == 0 {
@@ -1654,9 +1657,9 @@ func evalPrefixExpression(p *ast.PrefixExpression, scope *Scope) Object {
 		case FLOAT_OBJ:
 			f := right.(*Float)
 			return NewFloat(-f.Float64)
-			//bug : we need to return a new 'Float' object, we should not change the original 'Float' object.
-			//f.Float64 = -f.Float64
-			//return f
+			// bug : we need to return a new 'Float' object, we should not change the original 'Float' object.
+			// f.Float64 = -f.Float64
+			// return f
 		}
 
 	case "++":
@@ -1744,9 +1747,9 @@ func evalInfixExpressionUDO(p *ast.InfixExpression, left Object, right Object, s
 
 // Infix expression for Meta-Operators
 func evalMetaOperatorInfixExpression(p *ast.InfixExpression, left Object, right Object, scope *Scope) Object {
-	//1. [1,2,3] ~+ [4,5,6] = [1+4, 2+5, 3+6]
-	//2. [1,2,3] ~+ 4 = [1+4, 2+4, 3+4]
-	//left must be an array
+	// 1. [1,2,3] ~+ [4,5,6] = [1+4, 2+5, 3+6]
+	// 2. [1,2,3] ~+ 4 = [1+4, 2+4, 3+4]
+	// left must be an array
 	if left.Type() != ARRAY_OBJ {
 		return NewError(p.Pos().Sline(), INFIXOP, left.Type(), p.Operator, right.Type())
 	}
@@ -1754,7 +1757,7 @@ func evalMetaOperatorInfixExpression(p *ast.InfixExpression, left Object, right 
 	leftMembers := left.(*Array).Members
 	leftNumLen := len(leftMembers)
 
-	//right could be an array or a number
+	// right could be an array or a number
 	var rightMembers []Object
 	_, rightIsNum := right.(Number)
 	if rightIsNum {
@@ -1812,7 +1815,6 @@ func evalMetaOperatorInfixExpression(p *ast.InfixExpression, left Object, right 
 	} // end for
 
 	return resultArr
-
 }
 
 // Evaluate infix expressions, e.g 1 + 2, a == 5, true == true, etc...
@@ -1824,12 +1826,12 @@ func evalInfixExpression(node *ast.InfixExpression, left, right Object, scope *S
 		right = GoValueToObject(right.(*GoObject).obj)
 	}
 
-	//User Defined Operator
+	// User Defined Operator
 	if node.Token.Type == token.UDO {
 		return evalInfixExpressionUDO(node, left, right, scope)
 	}
 
-	//Null-Coalescing Operator(??)
+	// Null-Coalescing Operator(??)
 	if node.Token.Type == token.QUESTIONMM {
 		if left.Type() == NIL_OBJ {
 			return right
@@ -1842,7 +1844,7 @@ func evalInfixExpression(node *ast.InfixExpression, left, right Object, scope *S
 	}
 
 	// Check if left is 'Writable'
-	if _, ok := left.(Writable); ok { //There are two Writeables in roach: FileObject, HttpResponseWriter.
+	if _, ok := left.(Writable); ok { // There are two Writeables in roach: FileObject, HttpResponseWriter.
 		if node.Operator == ">>" { // '>>' is refered as 'extraction operator'. e.g.
 			// Left is a file object
 			if left.Type() == FILE_OBJ { // FileObject is also readable
@@ -1850,10 +1852,10 @@ func evalInfixExpression(node *ast.InfixExpression, left, right Object, scope *S
 				//    stdin >> a
 			}
 
-			//right should be an identifier
+			// right should be an identifier
 			var rightVar *ast.Identifier
 			var ok bool
-			if rightVar, ok = node.Right.(*ast.Identifier); !ok { //not an identifier
+			if rightVar, ok = node.Right.(*ast.Identifier); !ok { // not an identifier
 				return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 			}
 			f := left.(*FileObject)
@@ -1872,7 +1874,7 @@ func evalInfixExpression(node *ast.InfixExpression, left, right Object, scope *S
 		if node.Operator == "<<" { // '<<' is refered as 'insertion operator'
 			if f, ok := left.(*FileObject); ok { // It's a FileOject
 				f.Write(node.Pos().Sline(), NewString(right.Inspect()))
-				//Here we return left, so we can chain multiple '<<'.
+				// Here we return left, so we can chain multiple '<<'.
 				// e.g.
 				//     stdout << "hello " << "world!"
 				return left
@@ -1886,7 +1888,7 @@ func evalInfixExpression(node *ast.InfixExpression, left, right Object, scope *S
 
 	_, leftIsNum := left.(Number)
 	_, rightIsNum := right.(Number)
-	//hasNumArg := leftIsNum || rightIsNum
+	// hasNumArg := leftIsNum || rightIsNum
 
 	//Note :Here the 'switch's order is important, if you change the order, it will evaluate differently
 	//e.g. 1 + [2,3] + "45" = [1,2,3,"45"](it's an array), if you change
@@ -1938,11 +1940,11 @@ func evalInfixExpression(node *ast.InfixExpression, left, right Object, scope *S
 			return FALSE
 		}
 
-		//Here we need to special handling for `Boolean` object. Because most of the time `BOOLEAN` will
-		//return TRUE and FALSE. But sometimes we have to returns a new `Boolean` object,
-		//Here we need to compare `Boolean.Bool` or else when we using
+		// Here we need to special handling for `Boolean` object. Because most of the time `BOOLEAN` will
+		// return TRUE and FALSE. But sometimes we have to returns a new `Boolean` object,
+		// Here we need to compare `Boolean.Bool` or else when we using
 		//   if (aBool == true)
-		//it will return false, but actually aBool is true.
+		// it will return false, but actually aBool is true.
 		if left.Type() == BOOLEAN_OBJ && right.Type() == BOOLEAN_OBJ {
 			l := left.(*Boolean)
 			r := right.(*Boolean)
@@ -2134,7 +2136,7 @@ func evalNumberInfixExpression(node *ast.InfixExpression, left Object, right Obj
 			return NewError(node.Pos().Sline(), DIVIDEBYZERO)
 		}
 		val := leftVal / rightVal
-		//Should Always return float
+		// Should Always return float
 		return NewFloat(val)
 	case "%", "~%":
 		if isInt {
@@ -2146,7 +2148,7 @@ func evalNumberInfixExpression(node *ast.InfixExpression, left Object, right Obj
 	case ">>":
 		if isInt {
 			aRes := uint64(leftVal) >> uint64(rightVal)
-			return NewInteger(int64(aRes)) //NOTE: CAST MAYBE NOT CORRECT
+			return NewInteger(int64(aRes)) // NOTE: CAST MAYBE NOT CORRECT
 		} else if isUInt {
 			aRes := uint64(leftVal) >> uint64(rightVal)
 			return NewUInteger(uint64(aRes))
@@ -2154,7 +2156,7 @@ func evalNumberInfixExpression(node *ast.InfixExpression, left Object, right Obj
 	case "<<":
 		if isInt {
 			aRes := uint64(leftVal) << uint64(rightVal)
-			return NewInteger(int64(aRes)) //NOTE: CAST MAYBE NOT CORRECT
+			return NewInteger(int64(aRes)) // NOTE: CAST MAYBE NOT CORRECT
 		} else if isUInt {
 			aRes := uint64(leftVal) << uint64(rightVal)
 			return NewUInteger(uint64(aRes))
@@ -2197,14 +2199,14 @@ func evalStringInfixExpression(node *ast.InfixExpression, left Object, right Obj
 	r := right.(*String)
 
 	switch node.Operator {
-	case "=~": //match
+	case "=~": // match
 		matched, _ := regexp.MatchString(r.String, l.String)
 		if matched {
 			return TRUE
 		}
 		return FALSE
 
-	case "!~": //not match
+	case "!~": // not match
 		matched, _ := regexp.MatchString(r.String, l.String)
 		if matched {
 			return FALSE
@@ -2280,7 +2282,6 @@ func evalTimeStringInfixExpression(node *ast.InfixExpression, left Object, right
 	}
 
 	return NewError(node.Pos().Sline(), INFIXOP, l.Type(), node.Operator, r.Type())
-
 }
 
 /*
@@ -2383,8 +2384,8 @@ func evalMixedTypeInfixExpression(node *ast.InfixExpression, left Object, right 
 		}
 		return FALSE
 
-	case "=~": //match
-		if left.Type() == NIL_OBJ { //nil is not matched with anything
+	case "=~": // match
+		if left.Type() == NIL_OBJ { // nil is not matched with anything
 			return FALSE
 		}
 
@@ -2402,7 +2403,7 @@ func evalMixedTypeInfixExpression(node *ast.InfixExpression, left Object, right 
 		}
 		return FALSE
 
-	case "!~": //not match
+	case "!~": // not match
 		if left.Type() == NIL_OBJ {
 			return TRUE
 		}
@@ -2425,7 +2426,7 @@ func evalMixedTypeInfixExpression(node *ast.InfixExpression, left Object, right 
 		return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 	}
 
-	//return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
+	// return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 }
 
 // array + item
@@ -2461,7 +2462,7 @@ func evalArrayInfixExpression(node *ast.InfixExpression, left Object, right Obje
 			return &Array{Members: leftVals}
 		}
 
-		//right is array
+		// right is array
 		rightVals := right.(*Array).Members
 		if left.Type() == ARRAY_OBJ {
 			leftVals := left.(*Array).Members
@@ -2521,8 +2522,8 @@ func evalArrayInfixExpression(node *ast.InfixExpression, left Object, right Obje
 		if left.Type() == ARRAY_OBJ {
 			leftVals := left.(*Array).Members
 			leftVals = append(leftVals, right)
-			left.(*Array).Members = leftVals //Change the array itself
-			return left                      //return the original array, so it could be chained by another '<<'
+			left.(*Array).Members = leftVals // Change the array itself
+			return left                      // return the original array, so it could be chained by another '<<'
 		}
 	}
 	return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
@@ -2549,7 +2550,7 @@ func evalTupleInfixExpression(node *ast.InfixExpression, left Object, right Obje
 			return &Tuple{Members: leftVals}
 		}
 
-		//right is array
+		// right is array
 		rightVals := right.(*Tuple).Members
 		if left.Type() == TUPLE_OBJ {
 			leftVals := left.(*Tuple).Members
@@ -2681,7 +2682,7 @@ func evalInstanceInfixExpression(node *ast.InfixExpression, left Object, right O
 		}
 		return FALSE
 	}
-	//get methods's modifier level
+	// get methods's modifier level
 	//	ml := instanceObj.GetModifierLevel(node.Operator, ClassMethodKind) //ml:modifier level
 	//	if ml == ast.ModifierPrivate {
 	//		return NewError(node.Pos().Sline(), CLSCALLPRIVATE, node.Operator, instanceObj.Class.Name)
@@ -2715,7 +2716,7 @@ func evalIfMacroStatement(im *ast.IfMacroStatement, scope *Scope) Object {
 }
 
 func evalIfExpression(ie *ast.IfExpression, scope *Scope) Object {
-	//eval "if/else-if" part
+	// eval "if/else-if" part
 	for _, c := range ie.Conditions {
 		condition := Eval(c.Cond, scope)
 		if condition.Type() == ERROR_OBJ {
@@ -2731,7 +2732,7 @@ func evalIfExpression(ie *ast.IfExpression, scope *Scope) Object {
 		}
 	}
 
-	//eval "else" part
+	// eval "else" part
 	if ie.Alternative != nil {
 		switch o := ie.Alternative.(type) {
 		case *ast.BlockStatement:
@@ -2776,7 +2777,7 @@ func evalDoLoopExpression(dl *ast.DoLoop, scope *Scope) Object {
 		}
 		if v, ok := e.(*ReturnValue); ok {
 			if v.Value != nil {
-				//return v.Value
+				// return v.Value
 				return v
 			}
 			break
@@ -2835,7 +2836,7 @@ func evalWhileLoopExpression(wl *ast.WhileLoop, scope *Scope) Object {
 					println(add(2,3))
 				*/
 
-				//return v.Value
+				// return v.Value
 				return v
 			}
 			break
@@ -2854,13 +2855,13 @@ func evalGrepExpression(ge *ast.GrepExpr, scope *Scope) Object {
 		return aValue
 	}
 
-	//first check if it's a Nil object
+	// first check if it's a Nil object
 	if aValue.Type() == NIL_OBJ {
-		//return an empty array object
+		// return an empty array object
 		return &Array{Members: []Object{}}
 	}
 
-	iterObj, ok := aValue.(Iterable) //must be Iterable
+	iterObj, ok := aValue.(Iterable) // must be Iterable
 	if !ok {
 		return NewError(ge.Pos().Sline(), GREPMAPNOTITERABLE)
 	}
@@ -2891,8 +2892,8 @@ func evalGrepExpression(ge *ast.GrepExpr, scope *Scope) Object {
 	result.Members = []Object{}
 
 	for _, item := range members {
-		//Note: we must opening a new scope, because the variable is different in each iteration.
-		//If not, then the next iteration will overwrite the previous assigned variable.
+		// Note: we must opening a new scope, because the variable is different in each iteration.
+		// If not, then the next iteration will overwrite the previous assigned variable.
 		newSubScope := NewScope(scope, nil)
 		newSubScope.Set(ge.Var, item)
 
@@ -2917,13 +2918,13 @@ func evalMapExpression(me *ast.MapExpr, scope *Scope) Object {
 		return aValue
 	}
 
-	//first check if it's a Nil object
+	// first check if it's a Nil object
 	if aValue.Type() == NIL_OBJ {
-		//return an empty array object
+		// return an empty array object
 		return &Array{Members: []Object{}}
 	}
 
-	iterObj, ok := aValue.(Iterable) //must be Iterable
+	iterObj, ok := aValue.(Iterable) // must be Iterable
 	if !ok {
 		return NewError(me.Pos().Sline(), GREPMAPNOTITERABLE)
 	}
@@ -2981,13 +2982,13 @@ func evalListComprehension(lc *ast.ListComprehension, scope *Scope) Object {
 		return aValue
 	}
 
-	//first check if it's a Nil object
+	// first check if it's a Nil object
 	if aValue.Type() == NIL_OBJ {
-		//return an empty array object
+		// return an empty array object
 		return &Array{Members: []Object{}}
 	}
 
-	iterObj, ok := aValue.(Iterable) //must be Iterable
+	iterObj, ok := aValue.(Iterable) // must be Iterable
 	if !ok {
 		return NewError(lc.Pos().Sline(), NOTITERABLE)
 	}
@@ -3087,13 +3088,13 @@ func evalListMapComprehension(mc *ast.ListMapComprehension, scope *Scope) Object
 		return aValue
 	}
 
-	//first check if it's a Nil object
+	// first check if it's a Nil object
 	if aValue.Type() == NIL_OBJ {
-		//return an empty array object
+		// return an empty array object
 		return &Array{Members: []Object{}}
 	}
 
-	iterObj, ok := aValue.(Iterable) //must be Iterable
+	iterObj, ok := aValue.(Iterable) // must be Iterable
 	if !ok {
 		return NewError(mc.Pos().Sline(), NOTITERABLE)
 	}
@@ -3101,7 +3102,7 @@ func evalListMapComprehension(mc *ast.ListMapComprehension, scope *Scope) Object
 		return NewError(mc.Pos().Sline(), NOTITERABLE)
 	}
 
-	//must be a *Hash, if not, panic
+	// must be a *Hash, if not, panic
 	hash, _ := aValue.(*Hash)
 
 	ret := &Array{}
@@ -3145,13 +3146,13 @@ func evalHashComprehension(hc *ast.HashComprehension, scope *Scope) Object {
 		return aValue
 	}
 
-	//first check if it's a Nil object
+	// first check if it's a Nil object
 	if aValue.Type() == NIL_OBJ {
-		//return an empty array object
+		// return an empty array object
 		return &Array{Members: []Object{}}
 	}
 
-	iterObj, ok := aValue.(Iterable) //must be Iterable
+	iterObj, ok := aValue.(Iterable) // must be Iterable
 	if !ok {
 		return NewError(hc.Pos().Sline(), NOTITERABLE)
 	}
@@ -3202,7 +3203,7 @@ func evalHashComprehension(hc *ast.HashComprehension, scope *Scope) Object {
 		}
 
 		ret.Push(hc.Pos().Sline(), keyResult, valueResult)
-		//ret.Pairs[hashable.HashKey()] = HashPair{Key: keyResult, Value: valueResult}
+		// ret.Pairs[hashable.HashKey()] = HashPair{Key: keyResult, Value: valueResult}
 	}
 
 	return ret
@@ -3246,7 +3247,7 @@ func evalHashRangeComprehension(hc *ast.HashRangeComprehension, scope *Scope) Ob
 		}
 
 		ret.Push(hc.Pos().Sline(), keyResult, valueResult)
-		//ret.Pairs[hashable.HashKey()] = HashPair{Key: keyResult, Value: valueResult}
+		// ret.Pairs[hashable.HashKey()] = HashPair{Key: keyResult, Value: valueResult}
 	}
 
 	return ret
@@ -3261,13 +3262,13 @@ func evalHashMapComprehension(mc *ast.HashMapComprehension, scope *Scope) Object
 		return aValue
 	}
 
-	//first check if it's a Nil object
+	// first check if it's a Nil object
 	if aValue.Type() == NIL_OBJ {
-		//return an empty array object
+		// return an empty array object
 		return &Array{Members: []Object{}}
 	}
 
-	iterObj, ok := aValue.(Iterable) //must be Iterable
+	iterObj, ok := aValue.(Iterable) // must be Iterable
 	if !ok {
 		return NewError(mc.Pos().Sline(), NOTITERABLE)
 	}
@@ -3275,7 +3276,7 @@ func evalHashMapComprehension(mc *ast.HashMapComprehension, scope *Scope) Object
 		return NewError(mc.Pos().Sline(), NOTITERABLE)
 	}
 
-	//must be a *Hash, if not, panic
+	// must be a *Hash, if not, panic
 	hash, _ := aValue.(*Hash)
 
 	ret := NewHash()
@@ -3308,7 +3309,7 @@ func evalHashMapComprehension(mc *ast.HashMapComprehension, scope *Scope) Object
 
 		if _, ok := keyResult.(Hashable); ok {
 			ret.Push(mc.Pos().Sline(), keyResult, valueResult)
-			//ret.Pairs[hashable.HashKey()] = HashPair{Key: keyResult, Value: valueResult}
+			// ret.Pairs[hashable.HashKey()] = HashPair{Key: keyResult, Value: valueResult}
 		} else {
 			return NewError(mc.Pos().Sline(), KEYERROR, keyResult.Type())
 		}
@@ -3318,7 +3319,7 @@ func evalHashMapComprehension(mc *ast.HashMapComprehension, scope *Scope) Object
 }
 
 func evalCaseExpression(ce *ast.CaseExpr, scope *Scope) Object {
-	rv := Eval(ce.Expr, scope) //case expression
+	rv := Eval(ce.Expr, scope) // case expression
 	if rv.Type() == ERROR_OBJ {
 		return rv
 	}
@@ -3327,21 +3328,21 @@ func evalCaseExpression(ce *ast.CaseExpr, scope *Scope) Object {
 	var elseExpr *ast.CaseElseExpr
 	for _, item := range ce.Matches {
 		if cee, ok := item.(*ast.CaseElseExpr); ok {
-			elseExpr = cee //cee: Case'Expr Else part
+			elseExpr = cee // cee: Case'Expr Else part
 			continue
 		}
 
 		matchExpr := item.(*ast.CaseMatchExpr)
-		matchRv := Eval(matchExpr.Expr, NewScope(scope, nil)) //matcher expression
+		matchRv := Eval(matchExpr.Expr, NewScope(scope, nil)) // matcher expression
 		if matchRv.Type() == ERROR_OBJ {
 			return matchRv
 		}
 
-		//check 'rv' and 'matchRv' equality, if not equal, then continue
+		// check 'rv' and 'matchRv' equality, if not equal, then continue
 		if !equal(ce.IsWholeMatch, rv, matchRv) {
 			continue
 		}
-		//Eval matcher block
+		// Eval matcher block
 		matcherScope := NewScope(scope, nil)
 		rv = Eval(matchExpr.Block, matcherScope)
 		if rv.Type() == ERROR_OBJ {
@@ -3362,7 +3363,7 @@ func evalCaseExpression(ce *ast.CaseExpr, scope *Scope) Object {
 	return rv
 }
 
-func evalForLoopExpression(fl *ast.ForLoop, scope *Scope) Object { //fl:For Loop
+func evalForLoopExpression(fl *ast.ForLoop, scope *Scope) Object { // fl:For Loop
 	innerScope := NewScope(scope, nil)
 
 	if fl.Init != nil {
@@ -3390,7 +3391,7 @@ func evalForLoopExpression(fl *ast.ForLoop, scope *Scope) Object { //fl:For Loop
 		}
 		if _, ok := result.(*Continue); ok {
 			if fl.Update != nil {
-				newVal := Eval(fl.Update, newSubScope) //Before continue, we need to call 'Update' and 'Cond'
+				newVal := Eval(fl.Update, newSubScope) // Before continue, we need to call 'Update' and 'Cond'
 				if newVal.Type() == ERROR_OBJ {
 					return newVal
 				}
@@ -3400,7 +3401,7 @@ func evalForLoopExpression(fl *ast.ForLoop, scope *Scope) Object { //fl:For Loop
 		}
 		if v, ok := result.(*ReturnValue); ok {
 			if v.Value != nil {
-				//return v.Value
+				// return v.Value
 				return v
 			}
 			break
@@ -3442,7 +3443,7 @@ func evalForEverLoopExpression(fel *ast.ForEverLoop, scope *Scope) Object {
 		}
 		if v, ok := e.(*ReturnValue); ok {
 			if v.Value != nil {
-				//return v.Value
+				// return v.Value
 				return v
 			}
 			break
@@ -3462,7 +3463,7 @@ func evalForEachFileLine(fal *ast.ForEachArrayLoop, scope *Scope) Object {
 			return line
 		}
 
-		if line.Type() == NIL_OBJ { //at end-of-line
+		if line.Type() == NIL_OBJ { // at end-of-line
 			break
 		}
 		scope.Set(fal.Var, line)
@@ -3507,7 +3508,7 @@ func evalForEachFileLine(fal *ast.ForEachArrayLoop, scope *Scope) Object {
 // for item in goObj
 // for item in linqObj
 // for item in <$fileObj>
-func evalForEachArrayExpression(fal *ast.ForEachArrayLoop, scope *Scope) Object { //fal:For Array Loop
+func evalForEachArrayExpression(fal *ast.ForEachArrayLoop, scope *Scope) Object { // fal:For Array Loop
 	innerScope := NewScope(scope, nil)
 
 	switch fal.Value.(type) {
@@ -3520,9 +3521,9 @@ func evalForEachArrayExpression(fal *ast.ForEachArrayLoop, scope *Scope) Object 
 		return aValue
 	}
 
-	//first check if it's a Nil object
+	// first check if it's a Nil object
 	if aValue.Type() == NIL_OBJ {
-		//return an empty array object
+		// return an empty array object
 		return &Array{Members: []Object{}}
 	}
 
@@ -3586,7 +3587,7 @@ func evalForEachArrayExpression(fal *ast.ForEachArrayLoop, scope *Scope) Object 
 				ret.Members = append(ret.Members, result)
 			}
 
-		} //end for
+		} // end for
 		if result == nil || result.Type() == BREAK_OBJ || result.Type() == CONTINUE_OBJ {
 			return ret
 		}
@@ -3624,9 +3625,9 @@ func evalForEachArrayExpression(fal *ast.ForEachArrayLoop, scope *Scope) Object 
 		if v, ok := result.(*ReturnValue); ok {
 
 			if v.Value != nil {
-				//ret.Members = append(ret.Members, v.Value)
+				// ret.Members = append(ret.Members, v.Value)
 				return v
-				//return v.Value
+				// return v.Value
 			}
 			break
 		} else {
@@ -3634,15 +3635,15 @@ func evalForEachArrayExpression(fal *ast.ForEachArrayLoop, scope *Scope) Object 
 		}
 	}
 
-	//Here we need to check `nil`, because if the initial condition is not true, then `for`'s Body will have no
-	//chance to execute, the result will be nil
-	//this is the reason why we need to check for `BREAK_OBJ` or `CONTINUE_OBJ`:
+	// Here we need to check `nil`, because if the initial condition is not true, then `for`'s Body will have no
+	// chance to execute, the result will be nil
+	// this is the reason why we need to check for `BREAK_OBJ` or `CONTINUE_OBJ`:
 	//    for i in 5..1 where i > 2 {
 	//      if (i == 3) { continue }
 	//      putln('i={i}')
 	//    }
-	//They will output "continue", this is not we expected
-	//A LONG TIME HIDDEN BUG!
+	// They will output "continue", this is not we expected
+	// A LONG TIME HIDDEN BUG!
 	if result == nil || result.Type() == BREAK_OBJ || result.Type() == CONTINUE_OBJ {
 		return ret
 	}
@@ -3705,7 +3706,7 @@ func evalForEachArrayWithIndex(fml *ast.ForEachMapLoop, val Object, scope *Scope
 
 			if v.Value != nil {
 				return v
-				//return v.Value
+				// return v.Value
 			}
 			break
 		} else {
@@ -3719,7 +3720,7 @@ func evalForEachArrayWithIndex(fml *ast.ForEachMapLoop, val Object, scope *Scope
 	return ret
 }
 
-func evalForEachMapExpression(fml *ast.ForEachMapLoop, scope *Scope) Object { //fml:For Map Loop
+func evalForEachMapExpression(fml *ast.ForEachMapLoop, scope *Scope) Object { // fml:For Map Loop
 	innerScope := NewScope(scope, nil)
 
 	aValue := Eval(fml.X, innerScope)
@@ -3727,9 +3728,9 @@ func evalForEachMapExpression(fml *ast.ForEachMapLoop, scope *Scope) Object { //
 		return aValue
 	}
 
-	//first check if it's a Nil object
+	// first check if it's a Nil object
 	if aValue.Type() == NIL_OBJ {
-		//return an empty array object
+		// return an empty array object
 		return &Array{Members: []Object{}}
 	}
 
@@ -3741,10 +3742,10 @@ func evalForEachMapExpression(fml *ast.ForEachMapLoop, scope *Scope) Object { //
 		return NewError(fml.Pos().Sline(), NOTITERABLE)
 	}
 
-	//for index, value in arr
-	//for index, value in string
-	//for index, value in tuple
-	//for index, value in linqObj
+	// for index, value in arr
+	// for index, value in string
+	// for index, value in tuple
+	// for index, value in linqObj
 	if aValue.Type() == STRING_OBJ || aValue.Type() == ARRAY_OBJ || aValue.Type() == TUPLE_OBJ || aValue.Type() == LINQ_OBJ {
 		return evalForEachArrayWithIndex(fml, aValue, innerScope)
 	}
@@ -3797,7 +3798,7 @@ func evalForEachMapExpression(fml *ast.ForEachMapLoop, scope *Scope) Object { //
 	return ret
 }
 
-func evalForEachDotRangeExpression(fdr *ast.ForEachDotRange, scope *Scope) Object { //fdr:For Dot Range
+func evalForEachDotRangeExpression(fdr *ast.ForEachDotRange, scope *Scope) Object { // fdr:For Dot Range
 	innerScope := NewScope(scope, nil)
 
 	startIdx := Eval(fdr.StartIdx, innerScope)
@@ -3842,7 +3843,7 @@ func evalForEachDotRangeExpression(fdr *ast.ForEachDotRange, scope *Scope) Objec
 		}
 		if v, ok := result.(*ReturnValue); ok {
 			if v.Value != nil {
-				//ret.Members = append(ret.Members, v.Value)
+				// ret.Members = append(ret.Members, v.Value)
 				return v
 			}
 			break
@@ -3859,11 +3860,11 @@ func evalForEachDotRangeExpression(fdr *ast.ForEachDotRange, scope *Scope) Objec
 
 // Helper function IsTrue for IF evaluation - neccessity is dubious
 func IsTrue(obj Object) bool {
-	if b, ok := obj.(*Boolean); ok { //if it is a Boolean Object
+	if b, ok := obj.(*Boolean); ok { // if it is a Boolean Object
 		return b.Bool
 	}
 
-	if _, ok := obj.(*Nil); ok { //if it is a Nil Object
+	if _, ok := obj.(*Nil); ok { // if it is a Nil Object
 		return false
 	}
 
@@ -3887,9 +3888,9 @@ func IsTrue(obj Object) bool {
 				return false
 			}
 
-			//why remove below check? please see below code:
+			// why remove below check? please see below code:
 			//    for line in <$f> { println(line) }
-			//Here when the line is empty, we should not return false.
+			// Here when the line is empty, we should not return false.
 			//		case STRING_OBJ:
 			//			if len(obj.(*String).String) == 0 {
 			//				return false
@@ -3939,7 +3940,7 @@ func evalBlockStatements(block []ast.Statement, scope *Scope) (results Object) {
 			return
 		}
 	}
-	return //do not return NIL, becuase we have already set the 'results'
+	return // do not return NIL, becuase we have already set the 'results'
 }
 
 // Eval when a function is _called_, includes fn literal evaluation and calling builtins
@@ -3948,36 +3949,36 @@ func evalFunctionCall(call *ast.CallExpression, scope *Scope) Object {
 	if !ok {
 		if f, ok := call.Function.(*ast.FunctionLiteral); ok {
 
-			//let add =fn(x,y) { x+y }
-			//add(2,3)
+			// let add =fn(x,y) { x+y }
+			// add(2,3)
 			fn = &Function{Literal: f, Scope: scope, Variadic: f.Variadic}
 			scope.Set(call.Function.String(), fn)
-		} else if idxExpr, ok := call.Function.(*ast.IndexExpression); ok { //index expression
-			//let complex={ "add" : fn(x,y){ x+y } }
-			//complex["add"](2,3)
+		} else if idxExpr, ok := call.Function.(*ast.IndexExpression); ok { // index expression
+			// let complex={ "add" : fn(x,y){ x+y } }
+			// complex["add"](2,3)
 			aValue := Eval(idxExpr, scope)
 			if aValue.Type() == ERROR_OBJ {
 				return aValue
 			}
 
-			if aFn, ok := aValue.(*Function); ok { //index expression
+			if aFn, ok := aValue.(*Function); ok { // index expression
 				fn = aFn
 			} else {
 				return reportTypoSuggestions(call.Function.Pos().Sline(), scope, call.Function.String())
-				//return NewError(call.Function.Pos().Sline(), UNKNOWNIDENT, call.Function.String())
+				// return NewError(call.Function.Pos().Sline(), UNKNOWNIDENT, call.Function.String())
 			}
 		} else if builtin, ok := builtins[call.Function.String()]; ok {
 			args := evalArgs(call.Arguments, scope)
-			//check for errors
+			// check for errors
 			for _, v := range args {
 				if v.Type() == ERROR_OBJ {
 					return v
 				}
 			}
 			return builtin.Fn(call.Function.Pos().Sline(), scope, args...)
-		} else if callExpr, ok := call.Function.(*ast.CallExpression); ok { //call expression
-			//let complex={ "add" : fn(x,y){ fn(z) {x+y+z} } }
-			//complex["add"](2,3)(4)
+		} else if callExpr, ok := call.Function.(*ast.CallExpression); ok { // call expression
+			// let complex={ "add" : fn(x,y){ fn(z) {x+y+z} } }
+			// complex["add"](2,3)(4)
 			aValue := Eval(callExpr, scope)
 			if aValue.Type() == ERROR_OBJ {
 				return aValue
@@ -3986,7 +3987,7 @@ func evalFunctionCall(call *ast.CallExpression, scope *Scope) Object {
 			fn = aValue
 		} else {
 			return reportTypoSuggestions(call.Function.Pos().Sline(), scope, call.Function.String())
-			//return NewError(call.Function.Pos().Sline(), UNKNOWNIDENT, call.Function.String())
+			// return NewError(call.Function.Pos().Sline(), UNKNOWNIDENT, call.Function.String())
 		}
 	}
 
@@ -4017,31 +4018,31 @@ func evalFunctionCall(call *ast.CallExpression, scope *Scope) Object {
 func evalFunctionObj(call *ast.CallExpression, f *Function, scope *Scope) Object {
 	var thisObj Object
 	var ok bool
-	//check if it's static function
+	// check if it's static function
 	thisObj, ok = scope.Get("this")
 	if ok {
 		if thisObj.Type() == CLASS_OBJ { // 'this' refers to Class object iteself
-			if !f.Literal.StaticFlag { //not static
+			if !f.Literal.StaticFlag { // not static
 				return NewError(call.Function.Pos().Sline(), CALLNONSTATICERROR)
 			}
 		} else { // 'this' refers to Class object instance
-			//instance method could call static method
+			// instance method could call static method
 		}
 	}
 
 	newScope := NewScope(f.Scope, nil)
 
-	//Register this function call in the call stack
+	// Register this function call in the call stack
 	newScope.CallStack.Frames = append(newScope.CallStack.Frames, CallFrame{FuncScope: newScope, CurrentCall: call})
 
-	//Using golang's defer mechanism, before function return, call current frame's defer method
+	// Using golang's defer mechanism, before function return, call current frame's defer method
 	defer func() {
 		frame := newScope.CurrentFrame()
 		if len(frame.defers) != 0 {
 			frame.runDefers(newScope)
 		}
 
-		//After run, must pop the frame
+		// After run, must pop the frame
 		stack := newScope.CallStack
 		stack.Frames = stack.Frames[0 : len(stack.Frames)-1]
 	}()
@@ -4049,7 +4050,7 @@ func evalFunctionObj(call *ast.CallExpression, f *Function, scope *Scope) Object
 	variadicParam := []Object{}
 	args := evalArgs(call.Arguments, scope)
 	for i := range call.Arguments {
-		//Because of function default values, we need to check `i >= len(args)`
+		// Because of function default values, we need to check `i >= len(args)`
 		if f.Variadic && i >= len(f.Literal.Parameters)-1 {
 			for j := i; j < len(args); j++ {
 				variadicParam = append(variadicParam, args[j])
@@ -4104,7 +4105,7 @@ func evalFunctionObj(call *ast.CallExpression, f *Function, scope *Scope) Object
 
 // Method calls for builtin Objects
 func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Object {
-	//First check if is a stanard library object
+	// First check if is a stanard library object
 	str := call.Object.String()
 	if obj, ok := GetGlobalObj(str); ok {
 		switch o := call.Call.(type) {
@@ -4112,10 +4113,10 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 			if arr, ok := GetGlobalObj(str + "." + o.Left.String()); ok {
 				return evalArrayIndex(arr.(*Array), o, scope)
 			}
-		case *ast.Identifier: //e.g. os.O_APPEND
+		case *ast.Identifier: // e.g. os.O_APPEND
 			if i, ok := GetGlobalObj(str + "." + o.String()); ok {
 				return i
-			} else { //e.g. method call like 'os.environ'
+			} else { // e.g. method call like 'os.environ'
 				if obj.Type() == HASH_OBJ { // It's a GoFuncObject
 					hash := obj.(*Hash)
 					for _, hk := range hash.Order {
@@ -4130,7 +4131,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 					return obj.CallMethod(call.Call.Pos().Sline(), scope, o.String())
 				}
 			}
-		case *ast.CallExpression: //e.g. method call like 'os.environ()'
+		case *ast.CallExpression: // e.g. method call like 'os.environ()'
 			if method, ok := call.Call.(*ast.CallExpression); ok {
 				args := evalArgs(method.Arguments, scope)
 				if obj.Type() == HASH_OBJ { // It's a GoFuncObject
@@ -4198,7 +4199,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 			}
 
 			return evalFunctionObj(o, fnObj.(*Function), scope)
-			//return evalFunctionCall(o, m.Scope)
+			// return evalFunctionCall(o, m.Scope)
 		}
 	case *Struct:
 		switch o := call.Call.(type) {
@@ -4222,40 +4223,40 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 		}
 	case *Hash:
 		switch o := call.Call.(type) {
-		//e.g.:
-		//hashObj.key1=10
-		//println(hashObj.key1)
+		// e.g.:
+		// hashObj.key1=10
+		// println(hashObj.key1)
 		case *ast.Identifier:
 			keyObj := NewString(call.Call.String())
 			return m.Get(call.Call.Pos().Sline(), keyObj)
 
 		case *ast.CallExpression:
-			//we need to get the hash key
+			// we need to get the hash key
 			keyStr := strings.Split(call.Call.String(), "(")[0]
 			keyObj := NewString(keyStr)
 			hashPair, ok := m.Pairs[keyObj.HashKey()]
 			if !ok {
-				//Check if it's a hash object's builtin method(e.g. hashObj.keys(), hashObj.values())
+				// Check if it's a hash object's builtin method(e.g. hashObj.keys(), hashObj.values())
 				if method, ok := call.Call.(*ast.CallExpression); ok {
 					args := evalArgs(method.Arguments, scope)
 					return obj.CallMethod(call.Call.Pos().Sline(), scope, method.Function.String(), args...)
 				}
 			}
 
-			//e.g.:
-			//hashObj = {}
-			//hashObj.str = fn() { return 10 }
-			//hashObj.str()
+			// e.g.:
+			// hashObj = {}
+			// hashObj.str = fn() { return 10 }
+			// hashObj.str()
 
 			// we need 'FunctionLiteral' here, so we need to change 'o.Function',
 			// because the o.Function's Type is '*ast.Identifier' which is the Hash's key
 			o.Function = hashPair.Value.(*Function).Literal
-			//return evalFunctionCall(o, scope)   This is a bug: not 'scope'
-			return evalFunctionCall(o, hashPair.Value.(*Function).Scope) //should be Function's scope
+			// return evalFunctionCall(o, scope)   This is a bug: not 'scope'
+			return evalFunctionCall(o, hashPair.Value.(*Function).Scope) // should be Function's scope
 		case *ast.IndexExpression:
-			//e.g.:
-			//doc = {"one": {"two": { "three": [1, 2, 3,] }}}
-			//printf("doc.one.two.three[2]=%v\n", doc.one.two.three[2])
+			// e.g.:
+			// doc = {"one": {"two": { "three": [1, 2, 3,] }}}
+			// printf("doc.one.two.three[2]=%v\n", doc.one.two.three[2])
 			leftVal := m.Get(call.Call.Pos().Sline(), NewString(o.Left.String()))
 			indexVal := Eval(o.Index, scope)
 			switch v := leftVal.(type) {
@@ -4271,7 +4272,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 	case *ObjectInstance:
 		instanceObj := m
 		switch o := call.Call.(type) {
-		//e.g.: instanceObj.key1
+		// e.g.: instanceObj.key1
 		case *ast.Identifier:
 			val, ok := instanceObj.Scope.Get(o.Value)
 			if ok {
@@ -4281,14 +4282,14 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 				}
 
 				switch val.(type) {
-				case *Function: //Function without parameter. e.g. obj.getMonth(), could be called using 'obj.getMonth'
+				case *Function: // Function without parameter. e.g. obj.getMonth(), could be called using 'obj.getMonth'
 					return evalFunctionDirect(val, []Object{}, instanceObj, instanceObj.Scope, nil)
 				default:
 					return val
 				}
 			}
 
-			//See if it's a property
+			// See if it's a property
 			p := instanceObj.GetProperty(o.Value)
 			if p != nil {
 				// check if it's a static variable
@@ -4296,12 +4297,12 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 					return NewError(call.Call.Pos().Sline(), PROPERTYUSEERROR, o.Value, instanceObj.Class.Name)
 				}
 
-				if p.Getter == nil { //property xxx { set; }
+				if p.Getter == nil { // property xxx { set; }
 					return NewError(call.Call.Pos().Sline(), PROPERTYUSEERROR, o.Value, instanceObj.Class.Name)
 				} else {
-					if len(p.Getter.Body.Statements) == 0 { //property xxx { get; }
+					if len(p.Getter.Body.Statements) == 0 { // property xxx { get; }
 						v, _ := instanceObj.Scope.Get("_" + o.Value)
-						//instanceObj.Scope.Set("_" + o.Value, v)
+						// instanceObj.Scope.Set("_" + o.Value, v)
 						return v
 					} else {
 						results := Eval(p.Getter.Body, instanceObj.Scope)
@@ -4312,10 +4313,10 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 				}
 			}
 			reportTypoSuggestions(call.Call.Pos().Sline(), instanceObj.Scope, o.Value)
-			//return NewError(call.Call.Pos().Sline(), UNKNOWNIDENT, o.Value)
+			// return NewError(call.Call.Pos().Sline(), UNKNOWNIDENT, o.Value)
 
 		case *ast.CallExpression:
-			//e.g. instanceObj.method()
+			// e.g. instanceObj.method()
 			fname := o.Function.String() // get function name
 
 			isStatic := instanceObj.IsStatic(fname, ClassMethodKind)
@@ -4343,7 +4344,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 	case *Class:
 		clsObj := m
 		switch o := call.Call.(type) {
-		case *ast.Identifier: //e.g.: classObj.key1
+		case *ast.Identifier: // e.g.: classObj.key1
 			var val Object
 			var ok bool
 
@@ -4377,9 +4378,9 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 				return NIL
 			}
 
-			//check if it's a property
+			// check if it's a property
 			p := clsObj.GetProperty(o.Value)
-			if p == nil { //not property, it's a member
+			if p == nil { // not property, it's a member
 				// check if it's a static member
 				if !clsObj.IsStatic(o.Value, ClassMemberKind) {
 					return NewError(call.Call.Pos().Sline(), MEMBERUSEERROR, o.Value, clsObj.Name)
@@ -4398,7 +4399,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 			}
 			return NIL
 
-		case *ast.CallExpression: //e.g. classObj.method()
+		case *ast.CallExpression: // e.g. classObj.method()
 			newScope := clsObj.Scope
 			fname := o.Function.String() // get function name
 
@@ -4441,14 +4442,14 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 				}
 			} else {
 				return reportTypoSuggestionsMeth(call.Call.Pos().Sline(), scope, clsObj.Name, fname)
-				//args := evalArgs(o.Arguments, scope)
-				//return clsObj.CallMethod(call.Call.Pos().Sline(), scope, fname, args...)
+				// args := evalArgs(o.Arguments, scope)
+				// return clsObj.CallMethod(call.Call.Pos().Sline(), scope, fname, args...)
 			}
 		}
 
 	default:
 		switch o := call.Call.(type) {
-		case *ast.Identifier: //e.g. method call like '[1,2,3].first', 'float$to_integer'
+		case *ast.Identifier: // e.g. method call like '[1,2,3].first', 'float$to_integer'
 			// Check if it's a builtin type extension method, for example: "float$xxx()"
 			ok := false
 			objType := strings.ToLower(string(obj.Type()))
@@ -4473,7 +4474,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 			} else {
 				return obj.CallMethod(call.Call.Pos().Sline(), scope, o.String())
 			}
-		case *ast.CallExpression: //e.g. method call like '[1,2,3].first()', 'float$to_integer()'
+		case *ast.CallExpression: // e.g. method call like '[1,2,3].first()', 'float$to_integer()'
 			args := evalArgs(o.Arguments, scope)
 			// Check if it's a builtin type extension method, for example: "float$xxx()"
 			ok := false
@@ -4504,11 +4505,10 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 	}
 
 	return NewError(call.Call.Pos().Sline(), NOMETHODERROR, call.String(), obj.Type())
-
 }
 
 func evalArgs(args []ast.Expression, scope *Scope) []Object {
-	//TODO: Refactor this to accept the params and args, go ahead and
+	// TODO: Refactor this to accept the params and args, go ahead and
 	// update scope while looping and return the Scope object.
 	e := []Object{}
 	for _, v := range args {
@@ -4530,7 +4530,7 @@ func evalIndexExpression(ie *ast.IndexExpression, scope *Scope) Object {
 		return evalStringIndex(iterable, ie, scope)
 	case *Tuple:
 		return evalTupleIndex(iterable, ie, scope)
-	case *ObjectInstance: //class indexer's getter
+	case *ObjectInstance: // class indexer's getter
 		return evalClassInstanceIndexer(iterable, ie, scope)
 	}
 	return NewError(ie.Pos().Sline(), NOINDEXERROR, left.Type())
@@ -4548,7 +4548,7 @@ func evalClassInstanceIndexer(instanceObj *ObjectInstance, ie *ast.IndexExpressi
 	propName := "this" + fmt.Sprintf("%d", num)
 	p := instanceObj.GetProperty(propName)
 	if p != nil {
-		//no getter or getter block is empty, e.g. 'property xxx { get; }'
+		// no getter or getter block is empty, e.g. 'property xxx { get; }'
 		if p.Getter == nil || len(p.Getter.Body.Statements) == 0 {
 			return NewError(ie.Pos().Sline(), INDEXERUSEERROR, instanceObj.Class.Name)
 		} else {
@@ -4579,7 +4579,7 @@ func evalClassInstanceIndexer(instanceObj *ObjectInstance, ie *ast.IndexExpressi
 func evalStringIndex(str *String, ie *ast.IndexExpression, scope *Scope) Object {
 	var idx int64
 	length := int64(utf8.RuneCountInString(str.String))
-	//length := int64(len(str.String))
+	// length := int64(len(str.String))
 	if exp, success := ie.Index.(*ast.SliceExpression); success {
 		return evalStringSliceExpression(str, exp, scope)
 	}
@@ -4604,8 +4604,8 @@ func evalStringIndex(str *String, ie *ast.IndexExpression, scope *Scope) Object 
 		return NewError(ie.Pos().Sline(), INDEXERROR, idx)
 	}
 
-	return NewString(string([]rune(str.String)[idx])) //support utf8,not very efficient
-	//return &String{String: string(str.String[idx]), Valid:true}  //only support ASCII
+	return NewString(string([]rune(str.String)[idx])) // support utf8,not very efficient
+	// return &String{String: string(str.String[idx]), Valid:true}  //only support ASCII
 }
 
 func evalStringSliceExpression(str *String, se *ast.SliceExpression, scope *Scope) Object {
@@ -4613,7 +4613,7 @@ func evalStringSliceExpression(str *String, se *ast.SliceExpression, scope *Scop
 	var slice int64
 
 	length := int64(utf8.RuneCountInString(str.String))
-	//length := int64(len(str.String))
+	// length := int64(len(str.String))
 
 	startIdx := Eval(se.StartIndex, scope)
 	if startIdx.Type() == ERROR_OBJ {
@@ -4667,7 +4667,7 @@ func evalHashKeyIndex(hash *Hash, ie *ast.IndexExpression, scope *Scope) Object 
 	var key Object
 	switch ie.Index.(type) {
 	case *ast.Identifier:
-		//check if the identfier is in scope
+		// check if the identfier is in scope
 		if k, ok := scope.Get(ie.Index.String()); ok {
 			return hash.Get(ie.Pos().Sline(), k)
 		} else {
@@ -4875,7 +4875,7 @@ func evalTupleIndex(tuple *Tuple, ie *ast.IndexExpression, scope *Scope) Object 
 }
 
 func evalPostfixExpression(left Object, node *ast.PostfixExpression, scope *Scope) Object {
-	if left.Type() == INSTANCE_OBJ { //operator overloading
+	if left.Type() == INSTANCE_OBJ { // operator overloading
 		instanceObj := left.(*ObjectInstance)
 		method := instanceObj.GetMethod(node.Operator)
 		if method != nil {
@@ -4885,7 +4885,7 @@ func evalPostfixExpression(left Object, node *ast.PostfixExpression, scope *Scop
 				args := []Object{left}
 				return evalFunctionDirect(method, args, instanceObj, newScope, nil)
 			case *BuiltinMethod:
-				//do nothing for now
+				// do nothing for now
 			}
 		}
 		return NewError(node.Pos().Sline(), POSTFIXOP, node.Operator, left.Type())
@@ -4960,7 +4960,7 @@ func evalTryStatement(tryStmt *ast.TryStmt, scope *Scope) Object {
 			if tryStmt.Var != "" {
 				catchScope.Set(tryStmt.Var, rv.(*Throw).value)
 			}
-			rv = evalBlockStatements(tryStmt.Catch.Statements, catchScope) //catch Block
+			rv = evalBlockStatements(tryStmt.Catch.Statements, catchScope) // catch Block
 			if rv.Type() == ERROR_OBJ {
 				return rv
 			}
@@ -4969,7 +4969,7 @@ func evalTryStatement(tryStmt *ast.TryStmt, scope *Scope) Object {
 		}
 	}
 
-	if tryStmt.Finally != nil { //finally will always run
+	if tryStmt.Finally != nil { // finally will always run
 		rv = evalBlockStatements(tryStmt.Finally.Statements, scope)
 		if rv.Type() == ERROR_OBJ {
 			return rv
@@ -4984,7 +4984,7 @@ func evalTryStatement(tryStmt *ast.TryStmt, scope *Scope) Object {
 
 // Evaluate ternary expression
 func evalTernaryExpression(te *ast.TernaryExpression, scope *Scope) Object {
-	condition := Eval(te.Condition, scope) //eval condition
+	condition := Eval(te.Condition, scope) // eval condition
 	if condition.Type() == ERROR_OBJ {
 		return condition
 	}
@@ -5032,10 +5032,10 @@ func evalPipeExpression(p *ast.Pipe, scope *Scope) Object {
 		// to the function arguments.
 		switch rightFunc.Call.(type) {
 		case *ast.Identifier:
-			//e.g.
-			//x = ["hello", "world"] |> strings.upper    : rightFunc.Call.(type) == *ast.Identifier
-			//x = ["hello", "world"] |> strings.upper()  : rightFunc.Call.(type) == *ast.CallExpression
-			//so here we convert *ast.Identifier to * ast.CallExpression
+			// e.g.
+			// x = ["hello", "world"] |> strings.upper    : rightFunc.Call.(type) == *ast.Identifier
+			// x = ["hello", "world"] |> strings.upper()  : rightFunc.Call.(type) == *ast.CallExpression
+			// so here we convert *ast.Identifier to * ast.CallExpression
 			rightFunc.Call = &ast.CallExpression{Token: p.Token, Function: rightFunc.Call}
 		}
 		rightFunc.Call.(*ast.CallExpression).Arguments = append([]ast.Expression{argument}, rightFunc.Call.(*ast.CallExpression).Arguments...)
@@ -5052,18 +5052,18 @@ func evalPipeExpression(p *ast.Pipe, scope *Scope) Object {
 // class name : parent { block }
 // class name (categoryname) { block }
 func evalClassStatement(c *ast.ClassStatement, scope *Scope) Object {
-	if c.CategoryName != nil { //it's a class category
+	if c.CategoryName != nil { // it's a class category
 		clsObj, ok := scope.Get(c.Name.Value)
 		if !ok {
 			return NewError(c.Pos().Sline(), CLASSCATEGORYERROR, c.Name, c.CategoryName)
 		}
 
-		//category only support methods and properties
+		// category only support methods and properties
 		cls := clsObj.(*Class)
-		for k, f := range c.ClassLiteral.Methods { //f :function
+		for k, f := range c.ClassLiteral.Methods { // f :function
 			cls.Methods[k] = Eval(f, scope).(ClassMethod)
 		}
-		for k, p := range c.ClassLiteral.Properties { //p :property
+		for k, p := range c.ClassLiteral.Properties { // p :property
 			cls.Properties[k] = p
 		}
 
@@ -5077,14 +5077,14 @@ func evalClassStatement(c *ast.ClassStatement, scope *Scope) Object {
 		clsObj = evalClassLiteral(c.ClassLiteral, scope)
 	}
 
-	scope.Set(c.Name.Value, clsObj) //save to scope
+	scope.Set(c.Name.Value, clsObj) // save to scope
 
 	return NIL
 }
 
 // let name = class : parent { block }
 func evalClassLiteral(c *ast.ClassLiteral, scope *Scope) Object {
-	var parentClass = BASE_CLASS //base class is the root of all classes in roach
+	parentClass := BASE_CLASS // base class is the root of all classes in roach
 	if c.Parent != "" {
 
 		parent, ok := scope.Get(c.Parent)
@@ -5114,25 +5114,25 @@ func evalClassLiteral(c *ast.ClassLiteral, scope *Scope) Object {
 		tmpClass = tmpClass.Parent
 	}
 
-	//create a new Class scope
+	// create a new Class scope
 	newScope := NewScope(scope, nil)
-	//evaluate the 'Members' fields of class with proper scope.
+	// evaluate the 'Members' fields of class with proper scope.
 	for idx := len(classChain) - 1; idx >= 0; idx-- {
 		for _, member := range classChain[idx].Members {
-			Eval(member, newScope) //evaluate the 'Members' fields of class
+			Eval(member, newScope) // evaluate the 'Members' fields of class
 		}
 		newScope = NewScope(newScope, nil)
 	}
 	clsObj.Scope = newScope.parentScope
-	clsObj.Scope.Set("this", clsObj) //make 'this' refer to class object itself
+	clsObj.Scope.Set("this", clsObj) // make 'this' refer to class object itself
 	clsObj.Scope.Set("parent", parentClass)
 
 	for k, f := range c.Methods {
 		clsObj.Methods[k] = Eval(f, scope).(ClassMethod)
 	}
 
-	//check if the method has @Override annotation, if so, search
-	//the method in parent hierarchical, if not found, then return error.
+	// check if the method has @Override annotation, if so, search
+	// the method in parent hierarchical, if not found, then return error.
 	for methodName, fnStmt := range c.Methods {
 		for _, anno := range fnStmt.Annotations {
 			if anno.Name.Value == OVERRIDE_ANNOCLASS.Name {
@@ -5147,7 +5147,7 @@ func evalClassLiteral(c *ast.ClassLiteral, scope *Scope) Object {
 }
 
 func evalClassLiterlForAnno(c *ast.ClassLiteral, scope *Scope) Object {
-	var parentClass = BASE_CLASS //base class is the root of all classes in roach
+	parentClass := BASE_CLASS // base class is the root of all classes in roach
 	if c.Parent != "" {
 		parent, ok := scope.Get(c.Parent)
 		if !ok {
@@ -5160,7 +5160,7 @@ func evalClassLiterlForAnno(c *ast.ClassLiteral, scope *Scope) Object {
 		}
 	}
 
-	if parentClass != BASE_CLASS && !parentClass.IsAnnotation { //parent not annotation
+	if parentClass != BASE_CLASS && !parentClass.IsAnnotation { // parent not annotation
 		return NewError(c.Pos().Sline(), PARENTNOTANNOTATION, c.Name, parentClass.Name)
 	}
 
@@ -5171,9 +5171,9 @@ func evalClassLiterlForAnno(c *ast.ClassLiteral, scope *Scope) Object {
 		IsAnnotation: true,
 	}
 
-	//create a new Class scope
+	// create a new Class scope
 	clsObj.Scope = NewScope(scope, nil)
-	clsObj.Scope.Set("this", clsObj) //make 'this' refer to class object itself
+	clsObj.Scope.Set("this", clsObj) // make 'this' refer to class object itself
 	clsObj.Scope.Set("parent", parentClass)
 
 	return clsObj
@@ -5199,23 +5199,23 @@ func evalNewExpression(n *ast.NewExpression, scope *Scope) Object {
 		tmpClass = tmpClass.Parent
 	}
 
-	//create a new Class scope
+	// create a new Class scope
 	newScope := NewScope(scope, nil)
-	//evaluate the 'Members' fields of class with proper scope.
+	// evaluate the 'Members' fields of class with proper scope.
 	for idx := len(classChain) - 1; idx >= 0; idx-- {
 		for _, member := range classChain[idx].Members {
 			if !member.StaticFlag {
-				Eval(member, newScope) //evaluate the 'Members' fields of class
+				Eval(member, newScope) // evaluate the 'Members' fields of class
 			}
 		}
 		newScope = NewScope(newScope, nil)
 	}
 
 	instance := &ObjectInstance{Class: clsObj, Scope: newScope.parentScope}
-	instance.Scope.Set("this", instance)        //make 'this' refer to instance
-	instance.Scope.Set("parent", classChain[1]) //make 'parent' refer to instance's parent
+	instance.Scope.Set("this", instance)        // make 'this' refer to instance
+	instance.Scope.Set("parent", classChain[1]) // make 'parent' refer to instance's parent
 
-	//Is it has a constructor ?
+	// Is it has a constructor ?
 	init := clsObj.GetMethod("init")
 	if init == nil {
 		return instance
@@ -5228,13 +5228,13 @@ func evalNewExpression(n *ast.NewExpression, scope *Scope) Object {
 
 	ret := evalFunctionDirect(init, args, instance, instance.Scope, nil)
 	if ret.Type() == ERROR_OBJ {
-		return ret //return the error object
+		return ret // return the error object
 	}
 	return instance
 }
 
 func processClassAnnotation(Annotations []*ast.AnnotationStmt, scope *Scope, line string, obj Object) {
-	for _, anno := range Annotations { //for each annotation
+	for _, anno := range Annotations { // for each annotation
 		annoClass, ok := scope.Get(anno.Name.Value)
 		if !ok {
 			panic(NewError(line, CLSNOTDEFINE, anno.Name.Value))
@@ -5242,10 +5242,10 @@ func processClassAnnotation(Annotations []*ast.AnnotationStmt, scope *Scope, lin
 
 		annoClsObj := annoClass.(*Class)
 
-		//create the annotation instance
+		// create the annotation instance
 		newScope := NewScope(scope, nil)
 		annoInstanceObj := &ObjectInstance{Class: annoClsObj, Scope: newScope}
-		annoInstanceObj.Scope.Set("this", annoInstanceObj) //make 'this' refer to annoObj
+		annoInstanceObj.Scope.Set("this", annoInstanceObj) // make 'this' refer to annoObj
 
 		switch o := obj.(type) {
 		case *Function:
@@ -5255,7 +5255,7 @@ func processClassAnnotation(Annotations []*ast.AnnotationStmt, scope *Scope, lin
 		}
 
 		defaultPropMap := make(map[string]ast.Expression)
-		//get all propertis which have default value in the annotation class
+		// get all propertis which have default value in the annotation class
 		tmpCls := annoClsObj
 		for tmpCls != nil {
 			for name, item := range tmpCls.Properties {
@@ -5267,14 +5267,14 @@ func processClassAnnotation(Annotations []*ast.AnnotationStmt, scope *Scope, lin
 			tmpCls = tmpCls.Parent
 		}
 
-		//check if the property(which has default value) exists in anno.Attribues
+		// check if the property(which has default value) exists in anno.Attribues
 		for name, item := range defaultPropMap {
-			if _, ok := anno.Attributes[name]; !ok { //not exists
+			if _, ok := anno.Attributes[name]; !ok { // not exists
 				anno.Attributes[name] = item
 			}
 		}
 
-		for k, v := range anno.Attributes { //for each annotation attribute
+		for k, v := range anno.Attributes { // for each annotation attribute
 			val := Eval(v, annoInstanceObj.Scope)
 			p := annoClsObj.GetProperty(k)
 			if p == nil {
@@ -5297,7 +5297,7 @@ func evalFunctionDirect(fn Object, args []Object, instance *ObjectInstance, scop
 		newScope := NewScope(scope, nil)
 		variadicParam := []Object{}
 		for i := range args {
-			//Because of function default values, we need to check `i >= len(args)`
+			// Because of function default values, we need to check `i >= len(args)`
 			if fn.Variadic && i >= len(fn.Literal.Parameters)-1 {
 				for j := i; j < len(args); j++ {
 					variadicParam = append(variadicParam, args[j])
@@ -5351,7 +5351,7 @@ func evalFunctionDirect(fn Object, args []Object, instance *ObjectInstance, scop
 			return NIL
 		}
 
-		//newScope.DebugPrint("    ") //debug
+		// newScope.DebugPrint("    ") //debug
 		results := Eval(fn.Literal.Body, newScope)
 		if obj, ok := results.(*ReturnValue); ok {
 			// if function returns multiple-values
@@ -5374,7 +5374,7 @@ func evalFunctionDirect(fn Object, args []Object, instance *ObjectInstance, scop
 
 // evaluate 'using' statement
 func evalUsingStatement(u *ast.UsingStmt, scope *Scope) Object {
-	//evaluate the assignment expression
+	// evaluate the assignment expression
 	obj := evalAssignExpression(u.Expr, scope)
 	if obj.Type() == ERROR_OBJ {
 		return obj
@@ -5384,7 +5384,7 @@ func evalUsingStatement(u *ast.UsingStmt, scope *Scope) Object {
 		if obj.Type() != NIL_OBJ {
 			// Check if val is 'Closeable'
 			if c, ok := obj.(Closeable); ok {
-				//call the 'Close' method of the object
+				// call the 'Close' method of the object
 				c.close(u.Pos().Sline())
 			}
 		}
@@ -5392,12 +5392,12 @@ func evalUsingStatement(u *ast.UsingStmt, scope *Scope) Object {
 	defer func() {
 		if r := recover(); r != nil { // if there is panic, we need to call fn()
 			fn()
-		} else { //no panic, we also need to call fn()
+		} else { // no panic, we also need to call fn()
 			fn()
 		}
 	}()
 
-	//evaluate the 'using' block statement
+	// evaluate the 'using' block statement
 	Eval(u.Block, scope)
 
 	return NIL
@@ -5451,7 +5451,6 @@ func evalCmdExpression(t *ast.CmdExpression, scope *Scope) Object {
 	c.Stdout = &out
 	c.Stderr = &stderr
 	err := c.Run()
-
 	if err != nil {
 		return &String{String: stderr.String(), Valid: false}
 	}
@@ -5485,15 +5484,15 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 	//from_clause : FROM identifier IN expression
 	fromObj := lq.FromQuery(line, innerScope, inValue, NewString(fromExpr.Var)).(*LinqObj)
 
-	//query_body : query_body_clause* select_or_group_clause query_continuation?
+	// query_body : query_body_clause* select_or_group_clause query_continuation?
 	tmpLinq := fromObj
 
-	//query_body_clause*
+	// query_body_clause*
 	for _, queryBody := range queryBodyExpr.QueryBody {
 		queryBodyExpr := queryBody.(*ast.QueryBodyClauseExpr)
 
 		switch clause := queryBodyExpr.Expr.(type) {
-		case *ast.AssignExpression: //let-clause
+		case *ast.AssignExpression: // let-clause
 			assignExp := clause
 
 			fl := constructFuncLiteral("", assignExp.Value, token.ASSIGN, assignExp.Pos())
@@ -5554,7 +5553,7 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 		}
 	}
 
-	//select_or_group_clause
+	// select_or_group_clause
 	switch queryBodyExpr.Expr.(type) {
 	case *ast.SelectExpr:
 		/*
@@ -5622,14 +5621,14 @@ func evalAwaitExpression(a *ast.AwaitExpr, scope *Scope) Object {
 		fn.Call.(*ast.CallExpression).Awaited = true
 		return evalMethodCallExpression(fn, scope)
 	default:
-		//should never reach this line, because the parser will check type call type
+		// should never reach this line, because the parser will check type call type
 		return NIL
 	}
 }
 
 func evalServiceStatement(s *ast.ServiceStatement, scope *Scope) Object {
-	//note: map's value is not important
-	var routeMap = map[string]bool{
+	// note: map's value is not important
+	routeMap := map[string]bool{
 		"url":     true,
 		"methods": true,
 		"host":    true,
@@ -5649,12 +5648,12 @@ func evalServiceStatement(s *ast.ServiceStatement, scope *Scope) Object {
 		var queries *Hash
 		var hasUrl bool
 		anno := fnStmt.Annotations[0]
-		for k, v := range anno.Attributes { //for each annotation attribute
+		for k, v := range anno.Attributes { // for each annotation attribute
 			if _, ok := routeMap[k]; ok {
 				if k == "url" {
 					hasUrl = true
 					val := Eval(v, scope).(*String)
-					//fmt.Printf("key=%s, val=%s, val.Type=%s\n", k, val.Inspect(), val.Type())
+					// fmt.Printf("key=%s, val=%s, val.Type=%s\n", k, val.Inspect(), val.Type())
 					svcObj.HandleFunc(s.Pos().Sline(), scope, val, f)
 				} else if k == "methods" {
 					methodArr = Eval(v, scope).(*Array)
@@ -5759,10 +5758,10 @@ func evalRangeExpression(node ast.Node, startIdx Object, endIdx Object, scope *S
 		}
 		endVal := endIdx.(*String).String
 
-		//only support single character with lowercase
+		// only support single character with lowercase
 		alphabet := "0123456789abcdefghijklmnopqrstuvwxyz"
 
-		//convert to int for easy comparation
+		// convert to int for easy comparation
 		leftByte := []int32(strings.ToLower(startVal))[0]
 		rightByte := []int32(strings.ToLower(endVal))[0]
 		if leftByte >= rightByte { // z -> a
@@ -5801,7 +5800,6 @@ func evalDiamondExpr(d *ast.DiamondExpr, scope *Scope) Object {
 	} else {
 		return NewError(d.Pos().Sline(), DIAMONDOPERERROR, obj.Type())
 	}
-
 }
 
 // Convert a Object to an ast.Expression.
@@ -5936,7 +5934,7 @@ func compareGoObj(left, right Object) bool {
 		return goObj.Equal(another)
 	}
 
-	//left and right both are GoObject
+	// left and right both are GoObject
 	return left.(*GoObject).Equal(right)
 }
 
@@ -5945,7 +5943,7 @@ func compareGoObj(left, right Object) bool {
 func reportTypoSuggestions(line string, scope *Scope, miss string) Object {
 	keys := scope.GetKeys()
 	found := TypoSuggestions(keys, miss)
-	if len(found) != 0 { //found suggestions
+	if len(found) != 0 { // found suggestions
 		return NewError(line, UNKNOWNIDENTEX, miss, strings.Join(found, ", "))
 	} else {
 		return NewError(line, UNKNOWNIDENT, miss)
@@ -5957,7 +5955,7 @@ func reportTypoSuggestions(line string, scope *Scope, miss string) Object {
 func reportTypoSuggestionsMeth(line string, scope *Scope, objName string, miss string) Object {
 	keys := scope.GetKeys()
 	found := TypoSuggestions(keys, miss)
-	if len(found) != 0 { //found suggestions
+	if len(found) != 0 { // found suggestions
 		return NewError(line, NOMETHODERROREX, miss, objName, strings.Join(found, ", "))
 	} else {
 		return NewError(line, NOMETHODERROR, miss, objName)
