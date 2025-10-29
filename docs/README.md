@@ -62,6 +62,7 @@ Table of Contents
       * [csv module](#csv-module)
       * [template module](#template-module)
       * [sql module](#sql-module)
+      * [llm module](#llm-module)
   * [About regular expression](#about-regular-expression)
   * [Useful Utilities](#useful-utilities)
   * [Document generator](#document-generator)
@@ -2804,6 +2805,53 @@ if (ret == nil) {
 }
 
 os.exit()
+```
+
+#### llm module 
+
+The `llm` module provides a interface for Ollama models.
+
+You should create a `.env` file to configure your model and load the `.env` file with the `-e` runtime option.
+
+```ini
+OLLAMA_HOST=http://localhost:11434
+OLLAMA_MODEL=hf.co/ibm-granite/granite-4.0-h-small-GGUF:latest
+```
+
+A sample script to dump the client configuration and run a query:
+
+```swift
+let gpt = llmConnect()
+
+println("Host: ", gpt.host)
+println("Moldel: ", gpt.model)
+
+println("CtxSize: ", gpt.ctxSize)
+println("NumGPU: ", gpt.numGPU)
+println("NumBatch: ", gpt.numBatch)
+
+println("Temperature: ", gpt.temperature)
+println("NumThread: ", gpt.numThread)
+println("NumPredict: ", gpt.numPredict)
+println("RepeatPenalty: ", gpt.repeatPenalty)
+
+let question = "Qual a questão cuja resposta seja 42?"
+let answer = gpt.generate("Qual a questão cuja resposta seja 42?")
+
+println("Question: ", question)
+println("Answer: ", answer)
+```
+
+The following parameters can be set in the `.env` file, with the respective default values:
+
+```ini
+LLM_NUM_CTX=8192
+LLM_NUM_GPU=99
+LLM_NUM_BATCH=512
+LLM_TEMPERATURE=0.7
+LLM_NUM_THREAD=16
+LLM_NUM_PREDICT=-1
+LLM_REPEAT_PENALTY=1.1
 ```
 
 ## About regular expression
