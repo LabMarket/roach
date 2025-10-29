@@ -13,17 +13,18 @@ const (
 )
 
 type LLMClientObject struct {
-	Client *api.Client
-	Host   string
-
-	model         string
-	ctxSize       int64
-	numGPU        int64
-	numBatch      int64
-	temperature   float64
-	numThread     int64
-	numPredict    int64
-	repeatPenalty float64
+	Client          *api.Client
+	Host            string
+	model           string
+	ctxSize         int64
+	numGPU          int64
+	numBatch        int64
+	temperature     float64
+	numThread       int64
+	numPredict      int64
+	repeatPenalty   float64
+	systemCard      string
+	conversationCtx []int
 }
 
 func NewClientObjectj() Object {
@@ -75,8 +76,14 @@ func (t *LLMClientObject) CallMethod(line string, scope *Scope, method string, a
 		return t.setRepeatPenalty(line, args...)
 	case "repeatPenalty":
 		return NewFloat(t.repeatPenalty)
+	case "systemCard":
+		return NewString(t.systemCard)
+	case "setSystemCard":
+		return t.setSystemCard(line, args...)
 	case "generate":
 		return t.generate(line, args...)
+	case "resetContext":
+		return t.resetContext(line, args...)
 	}
 	return NewError(line, NOMETHODERROR, method, t.Type())
 }
@@ -193,6 +200,30 @@ func (t *LLMClientObject) setRepeatPenalty(line string, args ...Object) Object {
 	return NIL
 }
 
+func (t *LLMClientObject) setSystemCard(line string, args ...Object) Object {
+	if len(args) != 1 {
+		return NewError(line, ARGUMENTERROR, "1", len(args))
+	}
+
+	s, ok := args[0].(*String)
+	if !ok {
+		return NewError(line, PARAMTYPEERROR, "first", "setSystemCard", "*String", args[0].Type())
+	}
+
+	t.systemCard = s.String
+	return NIL
+}
+
+func (t *LLMClientObject) resetContext(line string, args ...Object) Object {
+	if len(args) != 0 {
+		return NewError(line, ARGUMENTERROR, "0", len(args))
+	}
+
+	t.conversationCtx = nil
+
+	return NIL
+}
+
 func (t *LLMClientObject) generate(line string, args ...Object) Object {
 	if len(args) != 1 {
 		return NewError(line, ARGUMENTERROR, "1", len(args))
@@ -231,11 +262,17 @@ func (t *LLMClientObject) generate(line string, args ...Object) Object {
 		Model:   t.model,
 		Prompt:  promptStr.String,
 		Options: options,
+		System:  t.systemCard,
+		Context: t.conversationCtx,
 	}
 
 	var sb strings.Builder
 	responseFunc := func(r api.GenerateResponse) error {
 		sb.WriteString(r.Response)
+		// Se a resposta estiver completa (Done), atualizamos o contexto para a próxima chamada.
+		if r.Done {
+			t.conversationCtx = r.Context
+		}
 		return nil
 	}
 

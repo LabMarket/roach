@@ -36,8 +36,18 @@ println("NumPredict: ", gpt.numPredict)
 println("RepeatPenalty: ", gpt.repeatPenalty)
 println("=================================================================")
 
+gpt.setSystemCard("Você é um assistente literário muito detalhista.")
+
 let question = "Qual a questão cuja resposta seja 42?"
 let answer = gpt.generate("Qual a questão cuja resposta seja 42?")
 
 println("Question: ", question)
 println("Answer: ", answer)
+println("=================================================================")
+
+gpt.resetContext()
+gpt.setSystemCard("Agora você é um assistente literário muito relapso e breve em suas responstas.")
+
+println("Question: ", question)
+println("Answer: ", answer)
+println("=================================================================")
