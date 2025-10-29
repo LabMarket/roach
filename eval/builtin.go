@@ -1059,8 +1059,8 @@ func dialUDPBuiltin() *Builtin {
 				return NewNil(err.Error())
 			}
 
-			conn, e := net.DialUDP(netStr.String, nil, udpAddr)
-			if e != nil {
+			conn, err := net.DialUDP(netStr.String, nil, udpAddr)
+			if err != nil {
 				return NewNil(err.Error())
 			}
 
