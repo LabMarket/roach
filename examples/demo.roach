@@ -1,5 +1,8 @@
 #!/usr/bin/env roach
 
+# It's an identifier, so it's a bare word:
+h = {A: "xxxx"}
+
 # Using 'let'(optional) to declare variable
 # functio as a first-class object
 let add  =  fn(x,y){
