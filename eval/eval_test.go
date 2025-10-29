@@ -206,17 +206,18 @@ func TestStringMethods(t *testing.T) {
 			testIntegerObject(t, evaluated, int64(expected))
 		case nil:
 			testNullObject(t, evaluated)
-		case Object: // For the NIL case
-			testNullObject(t, evaluated)
 		case string:
 			testStringObject(t, evaluated, expected)
 		case *Error:
 			if evaluated.(*Error).Message != expected.Message {
 				t.Fatalf("wrong error message. expected=%s, got=%s", expected.Message, evaluated.(*Error).Message)
 			}
+		case Object: // For the NIL case
+			testNullObject(t, evaluated)
 		}
 	}
 }
+
 func TestStringIndexExpressions(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -536,6 +537,7 @@ func TestBuiltinFunction(t *testing.T) {
 		}
 	}
 }
+
 func TestStringLiteral(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -585,6 +587,7 @@ func TestFunctionApplication(t *testing.T) {
 		testIntegerObject(t, testEval(tt.input), tt.expected)
 	}
 }
+
 func TestFunctionObject(t *testing.T) {
 	input := "fn(x) { x + 2 };"
 
