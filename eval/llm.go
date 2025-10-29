@@ -1,6 +1,9 @@
 package eval
 
 import (
+	"context"
+	"strings"
+
 	"github.com/ollama/ollama/api"
 )
 
@@ -195,5 +198,51 @@ func (t *LLMClientObject) generate(line string, args ...Object) Object {
 		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
-	return NIL
+	promptStr, ok := args[0].(*String)
+	if !ok {
+		return NewError(line, PARAMTYPEERROR, "first", "prompt", "*String", args[0].Type())
+	}
+
+	ctx := context.Background()
+
+	options := map[string]interface{}{}
+	if t.ctxSize != 0 {
+		options["num_ctx"] = t.ctxSize
+	}
+	if t.numGPU != 0 {
+		options["num_gpu"] = t.numGPU
+	}
+	if t.numBatch != 0 {
+		options["num_batch"] = t.numBatch
+	}
+	if t.temperature != 0.0 {
+		options["temperature"] = t.temperature
+	}
+	if t.numThread != 0 {
+		options["num_thread"] = t.numThread
+	}
+	if t.numPredict != 0 {
+		options["num_predict"] = t.numPredict
+	}
+	if t.repeatPenalty != 0.0 {
+		options["repeat_penalty"] = t.repeatPenalty
+	}
+	req := &api.GenerateRequest{
+		Model:   t.model,
+		Prompt:  promptStr.String,
+		Options: options,
+	}
+
+	var sb strings.Builder
+	responseFunc := func(r api.GenerateResponse) error {
+		sb.WriteString(r.Response)
+		return nil
+	}
+
+	err := t.Client.Generate(ctx, req, responseFunc)
+	if err != nil {
+		return NewError(line, GENERICERROR, err.Error())
+	}
+
+	return NewString(sb.String())
 }
