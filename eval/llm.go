@@ -84,6 +84,8 @@ func (t *LLMClientObject) CallMethod(line string, scope *Scope, method string, a
 		return t.generate(line, args...)
 	case "resetContext":
 		return t.resetContext(line, args...)
+	case "pullModel":
+		return t.pullModel(line, args...)
 	}
 	return NewError(line, NOMETHODERROR, method, t.Type())
 }
@@ -220,6 +222,34 @@ func (t *LLMClientObject) resetContext(line string, args ...Object) Object {
 	}
 
 	t.conversationCtx = nil
+
+	return NIL
+}
+
+func (t *LLMClientObject) pullModel(line string, args ...Object) Object {
+	if len(args) != 1 {
+		return NewError(line, ARGUMENTERROR, "1", len(args))
+	}
+
+	s, ok := args[0].(*String)
+	if !ok {
+		return NewError(line, PARAMTYPEERROR, "first", "pullModel", "*String", args[0].Type())
+	}
+
+	t.model = s.String
+
+	ctx := context.Background()
+
+	req := &api.PullRequest{
+		Name: t.model,
+	}
+
+	progressFn := func(resp api.ProgressResponse) error { return nil }
+
+	err := t.Client.Pull(ctx, req, progressFn)
+	if err != nil {
+		return NewError(line, GENERICERROR, err.Error())
+	}
 
 	return NIL
 }

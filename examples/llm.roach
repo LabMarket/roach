@@ -22,7 +22,7 @@ let gpt = llmConnect()
 
 println("============ Connection data ====================================")
 println("Host: ", gpt.host)
-println("Moldel: ", gpt.model)
+println("Model: ", gpt.model)
 
 println("========== Context Parameters ===================================")
 println("CtxSize: ", gpt.ctxSize)
@@ -39,14 +39,24 @@ println("=================================================================")
 gpt.setSystemCard("Você é um assistente literário muito detalhista.")
 
 let question = "Qual a questão cuja resposta seja 42?"
-let answer = gpt.generate("Qual a questão cuja resposta seja 42?")
+
+let answer = gpt.generate(question)
 
 println("Question: ", question)
 println("Answer: ", answer)
 println("=================================================================")
 
 gpt.resetContext()
-gpt.setSystemCard("Agora você é um assistente literário muito relapso e breve em suas responstas.")
+gpt.setModel("llama2")
+
+println("============ Connection data ====================================")
+println("Host: ", gpt.host)
+println("Model: ", gpt.model)
+println("=================================================================")
+
+gpt.setSystemCard("Agora você é um assistente literário muito relapso e breve em suas respostas. Responsa sempre em lingua portuguesa!")
+
+let answer = gpt.generate(question)
 
 println("Question: ", question)
 println("Answer: ", answer)

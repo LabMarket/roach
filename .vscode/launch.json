@@ -7,7 +7,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/main.go",
-            "args": ["-e", "${workspaceFolder}/examples/LLM.env", "${file}"],
+            "args": ["-e", "${workspaceFolder}/examples/granite.env", "${file}"],
         },
         {
             "name": "Roach Version",
