@@ -4,7 +4,7 @@
 // This program dumps the command-line arguments the script received.
 //
 
-println( "Roach version: ", lang.Version, ".", lang.BuildNumber )
+printfln( "Roach version: ", lang.Version, ".", lang.BuildNumber )
 
 
 for arg in gos.Args {

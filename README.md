@@ -1,6 +1,6 @@
 # Roach Programming Language
 
-This is a fork from https://github.com/haifenghuang/magpie language interpreter.
+This is a fork from [Magpie](https://github.com/haifenghuang/magpie) language interpreter.
 
 ## Summary
 

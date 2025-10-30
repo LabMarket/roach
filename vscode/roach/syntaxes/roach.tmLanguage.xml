@@ -789,7 +789,7 @@
 		<key>support-type-built-ins-classes-d</key>
 		<dict>
 			<key>match</key>
-			<string>\b(abs|range|addm|chr|newFile|int|float|str|array|len|methods|ord|print|printf|println|type|chan|assert|reverse|dialTCP|listenTCP|dialUDP|dialUnix|listenUnix|dbOpen|newTime|newDate|newCond|newOnce|newMutex|newRWMutex|newWaitGroup|newPipe|newLogger|newList|deepEqual|newCsvReader|newCsvWriter|instanceOf|is_a|classOf)\b</string>
+			<string>\b(abs|range|addm|chr|newFile|int|float|str|array|len|methods|ord|print|printf|println|type|chan|assert|reverse|dialTCP|listenTCP|dialUDP|dialUnix|listenUnix|dbOpen|llmConnect|newTime|newDate|newCond|newOnce|newMutex|newRWMutex|newWaitGroup|newPipe|newLogger|newList|deepEqual|newCsvReader|newCsvWriter|instanceOf|is_a|classOf)\b</string>
 			<key>name</key>
 			<string>support.type.built-ins.functions.roach</string>
 		</dict>
