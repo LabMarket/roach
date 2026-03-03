@@ -28,3 +28,4 @@ go.work
 
 # Custom
 *.db
+.DS_Store
